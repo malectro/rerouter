@@ -8,7 +8,8 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "build": "babel src -d es"
+    "build": "babel src -d es",
+    "flow": "flow src"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.39",
@@ -16,10 +17,17 @@
     "@babel/plugin-proposal-class-properties": "^7.0.0-beta.39",
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.39",
     "@babel/preset-env": "^7.0.0-beta.39",
-    "@babel/preset-react": "^7.0.0-beta.39"
+    "@babel/preset-flow": "^7.0.0-beta.39",
+    "@babel/preset-react": "^7.0.0-beta.39",
+    "flow-bin": "^0.64.0",
+    "flow-typed": "^2.3.0"
   },
   "peerDependencies": {
     "react": "^16.2.0",
+    "redux": "^3.7.2"
+  },
+  "dependencies": {
+    "invariant": "^2.2.2",
     "react-redux": "^5.0.6"
   }
 }

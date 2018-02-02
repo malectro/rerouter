@@ -1,21 +1,46 @@
+// @flow
+
+import type {Route, Location, LocationType, Query, Action} from './types';
+import type {RerouterAction} from './actions';
+
+import invariant from 'invariant';
+
 import {PUSH, REPLACE, POP, HANDLE_POP} from './actions';
 
 
-export default function reduce({routes, history, location}, router = {
+export type State = {
+  history?: History,
+  location: Location,
+  path: {
+    route: Route,
+    params: Query,
+  }[],
+  params: Query,
+};
+
+export default function reduce({routes, history, location}: {
+  routes: Route[],
+  history?: History,
+  location: Location,
+}, router: State = {
   history,
   location,
   path: match(routes, location.pathname),
-}, action) {
+  params: {},
+}, action: RerouterAction) {
   switch (action.type) {
     case PUSH:
-      router.history.pushState({}, null, massageLocation(action.payload));
+      invariant(router.history, 'The rerouter action PUSH was dispatched without an initialized history. It is okay to not initialize history in a server-side context, but rerouter actions should never be dispatched.');
+      router.history.pushState({}, '', massageLocation(action.payload));
       break;
 
     case REPLACE:
-      router.history.replaceState({}, null, massageLocation(action.payload));
+      invariant(router.history, 'The rerouter action REPLACE was dispatched without an initialized history. It is okay to not initialize history in a server-side context, but rerouter actions should never be dispatched.');
+      router.history.replaceState({}, '', massageLocation(action.payload));
       break;
 
     case POP:
+      invariant(router.history, 'The rerouter action POP was dispatched without an initialized history. It is okay to not initialize history in a server-side context, but rerouter actions should never be dispatched.');
       router.history.back();
       return router;
 
@@ -27,7 +52,7 @@ export default function reduce({routes, history, location}, router = {
   }
 
   const path = match(routes, location.pathname);
-  const params = path.reduce((allParams, {params}) => ({...allParams, ...params}));
+  const params = path.reduce((allParams, {params}) => ({...allParams, ...params})) || {};
 
   return {
     ...router,
@@ -36,8 +61,7 @@ export default function reduce({routes, history, location}, router = {
   };
 }
 
-
-function massageLocation(location) {
+function massageLocation(location: LocationType) {
   if (typeof location !== 'string') {
     let {pathname = '', query, search} = location;
 
@@ -48,12 +72,12 @@ function massageLocation(location) {
       }
     }
 
-    location = pathname + search;
+    location = pathname + (search || '');
   }
   return location
 }
 
-export function match(routes, pathname) {
+export function match(routes: Route[], pathname: string) {
   for (let route of routes) {
     const {path, children} = route;
 
@@ -65,7 +89,7 @@ export function match(routes, pathname) {
           params: {},
         };
       } else {
-        matchInfo = matches(route.path, pathname);
+        matchInfo = matches(path, pathname);
       }
 
       if (matchInfo) {
@@ -78,8 +102,10 @@ export function match(routes, pathname) {
           return trail;
         }
       }
-    } else {
-      const matchInfo = matches(route.path, pathname);
+
+    // NOTE (kyle): trick to check if string is defined
+    } else if (path != null) {
+      const matchInfo = matches(path, pathname);
       if (matchInfo && matchInfo.length === pathname.length) {
         return [{
           route,
@@ -88,9 +114,10 @@ export function match(routes, pathname) {
       }
     }
   }
+  return [];
 }
 
-function matches(routePath, pathname) {
+function matches(routePath: string, pathname: string) {
   const routeMatcher = pathToRegex(routePath);
   const match = routeMatcher.regex.exec(pathname);
 
@@ -106,7 +133,7 @@ function matches(routePath, pathname) {
   }
 }
 
-function pathToRegex(path) {
+function pathToRegex(path: string) {
   const params = /:([^\/]+)/g.exec(path);
   const string = path.replace(/:([^\/]+)/g, '([^/]+)').replace('*', '[^/]*');
   return {

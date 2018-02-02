@@ -1,10 +1,18 @@
+// @flow
+
+import type {LocationType, Dispatch} from './types';
+
 import * as React from 'react';
 import {connect} from 'react-redux';
 
 import {push} from './actions';
 
 
-class Link extends Component {
+class Link extends React.Component<{
+  to: LocationType,
+  children: React.Node,
+  dispatch: Dispatch,
+}> {
   render() {
     const {to, children, ...props} = this.props;
     const href = typeof to === 'string' ? to : to.pathname;
