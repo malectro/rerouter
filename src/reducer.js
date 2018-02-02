@@ -1,6 +1,6 @@
 // @flow
 
-import type {Route, Location, LocationType, Query, Action} from './types';
+import type {Route, Location, LocationType, Query} from './types';
 import type {RerouterAction} from './actions';
 
 import invariant from 'invariant';
@@ -18,29 +18,46 @@ export type State = {
   params: Query,
 };
 
-export default function reduce({routes, history, location}: {
-  routes: Route[],
-  history?: History,
-  location: Location,
-}, router: State = {
-  history,
-  location,
-  path: match(routes, location.pathname),
-  params: {},
-}, action: RerouterAction) {
+export default function reduce(
+  {
+    routes,
+    history,
+    location,
+  }: {
+    routes: Route[],
+    history?: History,
+    location: Location,
+  },
+  router: State = {
+    history,
+    location,
+    path: match(routes, location.pathname),
+    params: {},
+  },
+  action: RerouterAction,
+) {
   switch (action.type) {
     case PUSH:
-      invariant(router.history, 'The rerouter action PUSH was dispatched without an initialized history. It is okay to not initialize history in a server-side context, but rerouter actions should never be dispatched.');
+      invariant(
+        router.history,
+        'The rerouter action PUSH was dispatched without an initialized history. It is okay to not initialize history in a server-side context, but rerouter actions should never be dispatched.',
+      );
       router.history.pushState({}, '', massageLocation(action.payload));
       break;
 
     case REPLACE:
-      invariant(router.history, 'The rerouter action REPLACE was dispatched without an initialized history. It is okay to not initialize history in a server-side context, but rerouter actions should never be dispatched.');
+      invariant(
+        router.history,
+        'The rerouter action REPLACE was dispatched without an initialized history. It is okay to not initialize history in a server-side context, but rerouter actions should never be dispatched.',
+      );
       router.history.replaceState({}, '', massageLocation(action.payload));
       break;
 
     case POP:
-      invariant(router.history, 'The rerouter action POP was dispatched without an initialized history. It is okay to not initialize history in a server-side context, but rerouter actions should never be dispatched.');
+      invariant(
+        router.history,
+        'The rerouter action POP was dispatched without an initialized history. It is okay to not initialize history in a server-side context, but rerouter actions should never be dispatched.',
+      );
       router.history.back();
       return router;
 
@@ -52,7 +69,8 @@ export default function reduce({routes, history, location}: {
   }
 
   const path = match(routes, location.pathname);
-  const params = path.reduce((allParams, {params}) => ({...allParams, ...params})) || {};
+  const params =
+    path.reduce((allParams, {params}) => ({...allParams, ...params})) || {};
 
   return {
     ...router,
@@ -63,7 +81,8 @@ export default function reduce({routes, history, location}: {
 
 function massageLocation(location: LocationType) {
   if (typeof location !== 'string') {
-    let {pathname = '', query, search} = location;
+    const {pathname = '', query} = location;
+    let {search} = location;
 
     if (query) {
       const keys = Object.keys(query);
@@ -74,11 +93,11 @@ function massageLocation(location: LocationType) {
 
     location = pathname + (search || '');
   }
-  return location
+  return location;
 }
 
 export function match(routes: Route[], pathname: string) {
-  for (let route of routes) {
+  for (const route of routes) {
     const {path, children} = route;
 
     if (children) {
@@ -103,14 +122,16 @@ export function match(routes: Route[], pathname: string) {
         }
       }
 
-    // NOTE (kyle): trick to check if string is defined
+      // NOTE (kyle): trick to check if string is defined
     } else if (path != null) {
       const matchInfo = matches(path, pathname);
       if (matchInfo && matchInfo.length === pathname.length) {
-        return [{
-          route,
-          params: matchInfo.params,
-        }];
+        return [
+          {
+            route,
+            params: matchInfo.params,
+          },
+        ];
       }
     }
   }

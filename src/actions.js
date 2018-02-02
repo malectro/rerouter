@@ -2,13 +2,11 @@
 
 import type {Action, LocationType} from './types';
 
-
 // actions
 export const PUSH = '@@router/push';
 export const REPLACE = '@@router/replace';
 export const POP = '@@router/pop';
 export const HANDLE_POP = '@@router/handlePop';
-
 
 export type PushAction = {
   type: '@@router/push',
@@ -28,7 +26,12 @@ export type HandlePopAction = {
   type: '@@router/handlePop',
 };
 
-export type RerouterAction = Action | PushAction | ReplaceAction | PopAction | HandlePopAction;
+export type RerouterAction =
+  | Action
+  | PushAction
+  | ReplaceAction
+  | PopAction
+  | HandlePopAction;
 
 // action creators
 export const push = (location: LocationType) => ({
@@ -48,4 +51,3 @@ export const pop = () => ({
 export const handlePop = () => ({
   type: HANDLE_POP,
 });
-

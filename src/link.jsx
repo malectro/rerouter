@@ -7,7 +7,6 @@ import {connect} from 'react-redux';
 
 import {push} from './actions';
 
-
 class Link extends React.Component<{
   to: LocationType,
   children: React.Node,
@@ -17,7 +16,9 @@ class Link extends React.Component<{
     const {to, children, ...props} = this.props;
     const href = typeof to === 'string' ? to : to.pathname;
     return (
-      <a {...props} onClick={this.handleClick} href={href}>{children}</a>
+      <a {...props} onClick={this.handleClick} href={href}>
+        {children}
+      </a>
     );
   }
 

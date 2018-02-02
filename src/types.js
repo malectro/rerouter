@@ -27,4 +27,4 @@ export type Action = {
   payload: any,
 };
 
-export type Dispatch = (RerouterAction) => any;
+export type Dispatch = RerouterAction => any;

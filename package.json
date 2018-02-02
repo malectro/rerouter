@@ -9,7 +9,10 @@
   "private": false,
   "scripts": {
     "build": "babel src -d es",
-    "flow": "flow src"
+    "flow": "flow src",
+    "format": "yarn prettier && yarn eslint:fix",
+    "eslint:fix": "eslint --fix src",
+    "prettier": "prettier --write \"src/**/*.{js,jsx,md,css}\""
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.39",
@@ -19,8 +22,14 @@
     "@babel/preset-env": "^7.0.0-beta.39",
     "@babel/preset-flow": "^7.0.0-beta.39",
     "@babel/preset-react": "^7.0.0-beta.39",
+    "babel-eslint": "^8.2.1",
+    "eslint": "^4.16.0",
+    "eslint-plugin-flowtype": "^2.42.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-react": "^7.6.1",
     "flow-bin": "^0.64.0",
-    "flow-typed": "^2.3.0"
+    "flow-typed": "^2.3.0",
+    "prettier": "^1.10.2"
   },
   "peerDependencies": {
     "react": "^16.2.0",

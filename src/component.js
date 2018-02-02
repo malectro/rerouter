@@ -8,12 +8,11 @@ import {connect} from 'react-redux';
 
 const mapStateToProps = ({router}) => router;
 
-const Router = ({history, location, path, params}: State) => {
-  return path.reduce((tree, {route: {component}}) => {
+const Router = ({location, path, params}: State) =>
+  path.reduce((tree, {route: {component}}) => {
     if (!component) {
       return tree;
     }
-    return React.createElement(component, {params}, tree);
+    return React.createElement(component, {location, params}, tree);
   }, null);
-};
 export default connect(mapStateToProps)(Router);
