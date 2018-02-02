@@ -3,7 +3,23 @@
   "version": "0.0.0",
   "description": "a thin, redux-first routing library designed as an easy replacement for react-router 3",
   "main": "src/index.js",
+  "module": "es/index.js",
   "author": "Kyle Warren",
   "license": "MIT",
-  "private": false
+  "private": false,
+  "scripts": {
+    "build": "babel src -d es"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.0.0-beta.39",
+    "@babel/core": "^7.0.0-beta.39",
+    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.39",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.39",
+    "@babel/preset-env": "^7.0.0-beta.39",
+    "@babel/preset-react": "^7.0.0-beta.39"
+  },
+  "peerDependencies": {
+    "react": "^16.2.0",
+    "react-redux": "^5.0.6"
+  }
 }

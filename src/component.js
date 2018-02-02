@@ -1,4 +1,4 @@
-import {createElement} from 'react';
+import * as React from 'react';
 import {connect} from 'react-redux';
 
 
@@ -9,7 +9,7 @@ const Router = ({history, location, path, params}) => {
     if (!component) {
       return tree;
     }
-    return createElement(component, {params}, tree);
+    return React.createElement(component, {params}, tree);
   }, null);
 };
 export default connect(mapStateToProps)(Router);
