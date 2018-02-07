@@ -11,6 +11,15 @@ export type Route = {
   children?: Route[],
 };
 
+export type Path = {
+  route: Route,
+  params: Params,
+}[];
+
+export type Params = {
+  [string]: string,
+};
+
 export type Location = {
   pathname: string,
   query?: Query,
