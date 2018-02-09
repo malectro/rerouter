@@ -36,10 +36,10 @@
   },
   "peerDependencies": {
     "react": ">=16",
-    "redux": ">=3"
+    "redux": ">=3",
+    "react-redux": ">=5"
   },
   "dependencies": {
-    "invariant": "^2.2.2",
-    "react-redux": ">=5"
+    "invariant": "^2.2.2"
   }
 }
