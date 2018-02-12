@@ -1,6 +1,6 @@
 // @flow
 
-import type {Route, Location, Query} from './types';
+import type {Route, Path, Location, Query} from './types';
 import type {RerouterAction} from './actions';
 
 import invariant from 'invariant';
@@ -13,10 +13,7 @@ import {match, getParams} from './path';
 export type State = {
   history?: History,
   location: Location,
-  path: {
-    route: Route,
-    params: Query,
-  }[],
+  path: Path,
   params: Query,
 };
 

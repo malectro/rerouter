@@ -12,7 +12,8 @@ export type Route = {
 };
 
 export type Path = {
-  route: Route,
+  part: ?string,
+  routeIndex: number,
   params: Params,
 }[];
 

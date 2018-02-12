@@ -1,10 +1,14 @@
 // @flow
 
+import type {ComponentType} from 'react';
 import type {Route, Path} from './types';
+
+import invariant from 'invariant';
 
 
 export function match(routes: Route[], pathname: string) {
-  for (const route of routes) {
+  for (let i = 0; i < routes.length; i++) {
+    const route = routes[i];
     const {path, children} = route;
 
     if (children) {
@@ -22,7 +26,8 @@ export function match(routes: Route[], pathname: string) {
         const trail = match(children, pathname.slice(matchInfo.length));
         if (trail) {
           trail.push({
-            route,
+            part: path,
+            routeIndex: i,
             params: matchInfo.params,
           });
           return trail;
@@ -35,7 +40,8 @@ export function match(routes: Route[], pathname: string) {
       if (matchInfo && matchInfo.length === pathname.length) {
         return [
           {
-            route,
+            part: path,
+            routeIndex: i,
             params: matchInfo.params,
           },
         ];
@@ -51,9 +57,22 @@ export function getParams(path: Path) {
   );
 }
 
-export function getComponents(path: Path) {
+export function getComponents(
+  path: Path,
+  routes: Route[],
+): ComponentType<any>[] {
+  let currentChildren = routes;
+  // $FlowIssue flow doesn't seem to work with filter
   return path
-    .map(({route: {component}}) => component)
+    .map(({routeIndex}) => {
+      invariant(
+        currentChildren,
+        'Attempted to get components for an invalid path.',
+      );
+      const route = currentChildren[routeIndex];
+      currentChildren = route.children;
+      return route.component;
+    })
     .filter(component => component);
 }
 
