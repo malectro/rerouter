@@ -24,8 +24,8 @@ export function match(routes: Route[], pathname: string) {
 
       if (matchInfo) {
         const trail = match(children, pathname.slice(matchInfo.length));
-        if (trail) {
-          trail.push({
+        if (trail && trail.length > 0) {
+          trail.unshift({
             part: path,
             routeIndex: i,
             params: matchInfo.params,
@@ -35,7 +35,9 @@ export function match(routes: Route[], pathname: string) {
       }
 
       // NOTE (kyle): trick to check if string is defined
-    } else if (path != null) {
+    }
+
+    if (path != null) {
       const matchInfo = matches(path, pathname);
       if (matchInfo && matchInfo.length === pathname.length) {
         return [
@@ -70,20 +72,23 @@ export function getComponents(
         'Attempted to get components for an invalid path.',
       );
       const route = currentChildren[routeIndex];
+
+      invariant(route, 'Attempted to get components for an invalid path.');
+
       currentChildren = route.children;
       return route.component;
     })
     .filter(component => component);
 }
 
-function matches(routePath: string, pathname: string) {
+export function matches(routePath: string, pathname: string) {
   const routeMatcher = pathToRegex(routePath);
   const match = routeMatcher.regex.exec(pathname);
 
   if (match) {
     const params = {};
     for (let i = 1; i < match.length; i++) {
-      params[routeMatcher.params[i]] = match[i];
+      params[routeMatcher.params[i - 1]] = match[i];
     }
     return {
       length: match[0].length,
@@ -92,11 +97,21 @@ function matches(routePath: string, pathname: string) {
   }
 }
 
-function pathToRegex(path: string) {
-  const params = /:([^\/]+)/g.exec(path);
-  const string = path.replace(/:([^\/]+)/g, '([^/]+)').replace('*', '[^/]*');
+export function pathToRegex(path: string) {
+  const params = pathToParams(path);
+  const string = path.replace(/:([^\/]+)/g, '([^/]+)').replace('*', '.*');
   return {
     regex: new RegExp(`^/?${string}`),
     params,
   };
+}
+
+function pathToParams(path: string) {
+  const regex = /:([^\/]+)/g;
+  let match;
+  const params = [];
+  while ((match = regex.exec(path))) {
+    params.push(match[1]);
+  }
+  return params;
 }
