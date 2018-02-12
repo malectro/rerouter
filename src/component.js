@@ -16,7 +16,7 @@ type Props = {
 const mapStateToProps = ({router}) => router;
 
 const Router = ({routes, location, path, params}: Props) =>
-  getComponents(path, routes).reduce(
+  getComponents(path, routes).reduceRight(
     (tree, component) =>
       React.createElement(component, {location, params}, tree),
     null,

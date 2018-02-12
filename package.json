@@ -15,7 +15,8 @@
     "format": "npm run prettier && npm run eslint:fix",
     "eslint:fix": "eslint --fix src",
     "prettier": "prettier --write \"src/**/*.{js,jsx,md,css}\"",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "test": "jest"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.39",
@@ -25,19 +26,22 @@
     "@babel/preset-env": "^7.0.0-beta.39",
     "@babel/preset-flow": "^7.0.0-beta.39",
     "@babel/preset-react": "^7.0.0-beta.39",
+    "babel-core": "^7.0.0-0",
     "babel-eslint": "^8.2.1",
+    "babel-jest": "^22.2.2",
     "eslint": "^4.16.0",
     "eslint-plugin-flowtype": "^2.42.0",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-react": "^7.6.1",
     "flow-bin": "^0.64.0",
     "flow-typed": "^2.3.0",
+    "jest": "^22.2.2",
     "prettier": "^1.10.2"
   },
   "peerDependencies": {
     "react": ">=16",
-    "redux": ">=3",
-    "react-redux": ">=5"
+    "react-redux": ">=5",
+    "redux": ">=3"
   },
   "dependencies": {
     "invariant": "^2.2.2"
