@@ -2,14 +2,21 @@
 
 import type {LocationType} from './types';
 
+import {parse, stringify} from 'querystringify';
+
 
 export function createLocation(location: LocationType) {
   if (typeof location === 'string') {
-    location = {
+    return {
       pathname: location,
     };
   }
-  return location;
+
+  return {
+    pathname: location.pathname,
+    search: location.search,
+    query: location.query || parse(location.search || ''),
+  };
 }
 
 export function stringifyLocation(location: LocationType) {
@@ -18,10 +25,7 @@ export function stringifyLocation(location: LocationType) {
     let {search} = location;
 
     if (query) {
-      const keys = Object.keys(query);
-      if (keys.length) {
-        search = `?${keys.map(key => `${key}=${query[key]}`).join('&')}`;
-      }
+      search = stringify(query);
     }
 
     location = pathname + (search || '');

@@ -6,7 +6,7 @@ import type {RerouterAction} from './actions';
 import invariant from 'invariant';
 
 import {PUSH, REPLACE, POP, HANDLE_POP} from './actions';
-import {stringifyLocation} from './utils';
+import {stringifyLocation, createLocation} from './utils';
 import {match, getParams} from './path';
 
 
@@ -29,7 +29,7 @@ export default function reduce(
   },
   router: State = {
     history,
-    location,
+    location: createLocation(location),
     path: match(routes, location.pathname),
     params: {},
   },
@@ -72,6 +72,7 @@ export default function reduce(
 
   return {
     ...router,
+    location: createLocation(location),
     params,
     path,
   };
