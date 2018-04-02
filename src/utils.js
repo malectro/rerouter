@@ -5,7 +5,13 @@ import type {LocationType} from './types';
 import {parse, stringify} from 'querystringify';
 
 
-export function createLocation(location: LocationType) {
+export function createLocation(
+  location: LocationType = {
+    pathname: '',
+    search: '',
+    query: {},
+  },
+) {
   if (typeof location === 'string') {
     return {
       pathname: location,

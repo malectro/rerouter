@@ -10,5 +10,5 @@ export {
 } from './actions';
 export {default as Link} from './link.jsx';
 export {default as Provider} from './component';
-export {applyRouter, initDOMContext} from './middleware';
+export {applyRouter, initDOMContext, createMiddleware} from './middleware';
 export {match, getParams, getComponents} from './path';

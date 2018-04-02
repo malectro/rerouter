@@ -55,7 +55,7 @@ export function match(routes: Route[], pathname: string) {
 
 export function getParams(path: Path) {
   return (
-    path.reduce((allParams, {params}) => ({...allParams, ...params})) || {}
+    path.reduce((allParams, {params}) => ({...allParams, ...params}), {}) || {}
   );
 }
 

@@ -1,6 +1,7 @@
 // @flow
 
 import type {RerouterAction} from './actions';
+import type {State} from './reducer';
 
 import * as React from 'react';
 
@@ -38,3 +39,4 @@ export type Action = {
 };
 
 export type Dispatch = RerouterAction => any;
+export type GetState = () => State;

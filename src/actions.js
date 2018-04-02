@@ -1,12 +1,13 @@
 // @flow
 
-import type {Action, LocationType} from './types';
+import type {Action, Location, LocationType, Path, Params} from './types';
 
 // actions
 export const PUSH = '@@router/push';
 export const REPLACE = '@@router/replace';
 export const POP = '@@router/pop';
 export const HANDLE_POP = '@@router/handlePop';
+export const ROUTE = '@@router/route';
 
 export type PushAction = {
   type: '@@router/push',
@@ -26,12 +27,21 @@ export type HandlePopAction = {
   type: '@@router/handlePop',
 };
 
+export type RouteAction = {
+  type: '@@router/route',
+  payload: {
+    path: Path,
+    params: Params,
+  },
+};
+
 export type RerouterAction =
   | Action
   | PushAction
   | ReplaceAction
   | PopAction
-  | HandlePopAction;
+  | HandlePopAction
+  | RouteAction;
 
 // action creators
 export const push = (location: LocationType) => ({
@@ -50,4 +60,13 @@ export const pop = () => ({
 
 export const handlePop = () => ({
   type: HANDLE_POP,
+});
+
+export const route = (payload: {
+  path: Path,
+  params: Params,
+  location: Location,
+}) => ({
+  type: ROUTE,
+  payload,
 });

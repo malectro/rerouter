@@ -11,6 +11,7 @@
     "build": "npm run build:es && npm run build:cjs",
     "build:es": "BABEL_ENV=es babel src -d es",
     "build:cjs": "BABEL_ENV=cjs babel src -d cjs",
+    "build:dev": "BABEL_ENV=cjs babel --watch src -d cjs",
     "flow": "flow src",
     "format": "npm run prettier && npm run eslint:fix",
     "eslint:fix": "eslint --fix src",
