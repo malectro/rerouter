@@ -1,3 +1,6 @@
+import 'babel-polyfill';
+
+
 export {
   PUSH,
   REPLACE,
