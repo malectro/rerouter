@@ -6,7 +6,7 @@ import type {Route, Path} from './types';
 import invariant from 'invariant';
 
 
-export function match(routes: Route[], pathname: string) {
+export async function match(routes: Route[], pathname: string) {
   for (let i = 0; i < routes.length; i++) {
     const route = routes[i];
     const {path, children} = route;
@@ -23,7 +23,7 @@ export function match(routes: Route[], pathname: string) {
       }
 
       if (matchInfo) {
-        const trail = match(children, pathname.slice(matchInfo.length));
+        const trail = await match(children, pathname.slice(matchInfo.length));
         if (trail && trail.length > 0) {
           trail.unshift({
             part: path,

@@ -67,10 +67,10 @@ export const createMiddleware = (
       // TODO (kyle): consider allowing @@redux/INIT
     }
 
-    const path = match(routes, location.pathname);
-    const params = getParams(path);
-
-    return next(route({path, params, location: createLocation(location)}));
+    return match(routes, location.pathname).then(path => {
+      const params = getParams(path);
+      return next(route({path, params, location: createLocation(location)}));
+    });
   } else if (type === POP) {
     invariant(
       history,
