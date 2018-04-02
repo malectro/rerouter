@@ -20,12 +20,12 @@ export type State = {
 export default function reduce(
   {
     routes,
-    history,
     location,
+    history,
   }: {
     routes: Route[],
-    history?: History,
     location: Location,
+    history?: History,
   },
   router: State = {
     history,

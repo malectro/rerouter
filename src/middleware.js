@@ -6,13 +6,12 @@ import type {State} from './reducer';
 
 import reduce from './reducer';
 import {handlePop} from './actions';
-import {createLocation} from './utils';
 
 
 export const applyRouter = (
   routes: Route[],
-  history?: History,
   location: Location,
+  history?: History,
 ) => (mainReducer: Function) => (
   state: {router: State},
   action: RerouterAction,
@@ -20,11 +19,7 @@ export const applyRouter = (
   state = mainReducer(state, action);
   return {
     ...state,
-    router: reduce(
-      {routes, history, location: createLocation(location)},
-      state.router,
-      action,
-    ),
+    router: reduce({routes, history, location}, state.router, action),
   };
 };
 
