@@ -8,6 +8,7 @@ import invariant from 'invariant';
 
 import {PUSH, REPLACE, POP, HANDLE_POP, handlePop, route} from './actions';
 import reduce from './reducer';
+import Routes from './routes';
 import {createLocation, stringifyLocation} from './utils';
 import {match, getParams} from './path';
 
@@ -33,7 +34,7 @@ export const initDOMContext = store => {
 const routeActions = new Set([PUSH, REPLACE, HANDLE_POP]);
 
 export const createMiddleware = (
-  routes: Route[],
+  routes: Routes,
   location: Location,
   history?: History,
 ) => ({dispatch: Dispatch, getState: GetState}) => (next: Function) => (
@@ -67,10 +68,11 @@ export const createMiddleware = (
       // TODO (kyle): consider allowing @@redux/INIT
     }
 
-    return match(routes, location.pathname).then(path => {
-      const params = getParams(path);
-      return next(route({path, params, location: createLocation(location)}));
-    });
+    return routes
+      .resolve(location.pathname)
+      .then(({path, params}) =>
+        next(route({path, params, location: createLocation(location)})),
+      );
   } else if (type === POP) {
     invariant(
       history,

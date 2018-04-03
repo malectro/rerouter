@@ -1,22 +1,22 @@
 // @flow
 
-import type {Route} from './types';
 import type {State} from './reducer';
 
 import * as React from 'react';
 import {connect} from 'react-redux';
 
-import {getComponents} from './path';
+import Routes from './routes';
 
 
 type Props = {
-  routes: Route[],
+  routes: Routes,
 } & State;
 
 const mapStateToProps = ({router}) => router;
 
-const Router = ({routes, location, path, params}: Props) =>
-  getComponents(path, routes).reduceRight(
+const Router = ({routes, location, path, params}: Props) => routes
+  .getComponents(path)
+  .reduceRight(
     (tree, component) =>
       React.createElement(component, {location, params}, tree),
     null,
