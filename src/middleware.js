@@ -37,9 +37,9 @@ export const createMiddleware = (
   routes: Routes,
   location: Location,
   history?: History,
-) => ({dispatch: Dispatch, getState: GetState}) => (next: Function) => (
-  action: RerouterAction,
-) => {
+) => ({dispatch, getState}: {dispatch: Dispatch, getState: GetState}) => (
+  next: Function,
+) => (action: RerouterAction) => {
   const {type} = action;
 
   if (routeActions.has(type)) {

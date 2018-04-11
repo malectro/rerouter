@@ -5,19 +5,14 @@ import type {Route, Path} from './types';
 
 import invariant from 'invariant';
 
-
+// TODO (kyle): handle failed async route resolution
 export async function match(routes: Route[], pathname: string) {
   for (let i = 0; i < routes.length; i++) {
     const route = routes[i];
-    const {path} = route;
+    const {path, getComponent} = route;
     let {children} = route;
 
     if (children) {
-      // NOTE (kyle): async load and monkey patch children
-      if (typeof children === 'function') {
-        route.children = children = await children();
-      }
-
       let matchInfo;
       if (!path) {
         matchInfo = {
@@ -29,6 +24,11 @@ export async function match(routes: Route[], pathname: string) {
       }
 
       if (matchInfo) {
+        // NOTE (kyle): async load and monkey patch children
+        if (typeof children === 'function') {
+          route.children = children = await children();
+        }
+
         const trail = await match(children, pathname.slice(matchInfo.length));
         if (trail && trail.length > 0) {
           trail.unshift({
@@ -36,6 +36,11 @@ export async function match(routes: Route[], pathname: string) {
             routeIndex: i,
             params: matchInfo.params,
           });
+
+          if (getComponent) {
+            route.component = await getComponent();
+          }
+
           return trail;
         }
       }
@@ -46,6 +51,10 @@ export async function match(routes: Route[], pathname: string) {
     if (path != null) {
       const matchInfo = matches(path, pathname);
       if (matchInfo && matchInfo.length === pathname.length) {
+        if (getComponent) {
+          route.component = await getComponent();
+        }
+
         return [
           {
             part: path,
