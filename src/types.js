@@ -9,7 +9,7 @@ import * as React from 'react';
 export type Route = {
   path?: string,
   component?: React.ComponentType<*>,
-  children?: Route[],
+  children?: Route[] | (() => Promise<Route[]>),
 };
 
 export type Path = {

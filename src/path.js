@@ -9,9 +9,15 @@ import invariant from 'invariant';
 export async function match(routes: Route[], pathname: string) {
   for (let i = 0; i < routes.length; i++) {
     const route = routes[i];
-    const {path, children} = route;
+    const {path} = route;
+    let {children} = route;
 
     if (children) {
+      // NOTE (kyle): async load and monkey patch children
+      if (typeof children === 'function') {
+        route.children = children = await children();
+      }
+
       let matchInfo;
       if (!path) {
         matchInfo = {
