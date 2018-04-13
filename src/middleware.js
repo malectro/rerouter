@@ -1,6 +1,6 @@
 // @flow
 
-import type {Route, Location, GetState, Dispatch} from './types';
+import type {Route, Path, Params, Location, GetState, Dispatch} from './types';
 import type {RerouterAction} from './actions';
 import type {State} from './reducer';
 
@@ -37,9 +37,13 @@ export const createMiddleware = (
   routes: Routes,
   location: Location,
   history?: History,
-) => ({dispatch, getState}: {dispatch: Dispatch, getState: GetState}) => (
-  next: Function,
-) => (action: RerouterAction) => {
+  transitionHooks?: Array<
+    ({routes: Routes, path: Path, params: Params}) => Promise<any>,
+  > = [],
+  dependencyLocals?: {} = {},
+) => (store: {dispatch: Dispatch, getState: GetState}) => (next: Function) => (
+  action: RerouterAction,
+) => {
   const {type} = action;
 
   if (routeActions.has(type)) {
@@ -70,6 +74,36 @@ export const createMiddleware = (
 
     return routes
       .resolve(location.pathname)
+      .then(async resolution => {
+        for (let i = 0; i < transitionHooks.length; i++) {
+          resolution = await transitionHooks[i](resolution);
+        }
+
+        return resolution;
+      })
+      .then(({path, params}) => {
+        // TODO (kyle): make this standard to the rerouter lib
+        // TODO (kyle): possibly have the app use Suspense for this
+        const dependencies = routes
+          .getComponents(path)
+          .map(component => component['@@redial-hooks'])
+          .filter(Boolean);
+
+        const dependencyParams = {store, params, location, ...dependencyLocals};
+
+        return resolveDependencies(dependencies, 'required', dependencyParams)
+          .then(() => {
+            resolveDependencies(dependencies, 'deferred', dependencyParams);
+            resolveDependencies(dependencies, 'clientSide', dependencyParams);
+
+            return {path, params};
+          })
+          .catch(error =>
+            // TODO (kyle): 500
+
+            ({path, params}),
+          );
+      })
       .then(({path, params}) =>
         next(route({path, params, location: createLocation(location)})),
       );
@@ -86,3 +120,12 @@ export const createMiddleware = (
 
   return next(action);
 };
+
+function resolveDependencies(dependencies, name, params) {
+  return Promise.all(
+    dependencies
+      .map(deps => deps[name])
+      .filter(Boolean)
+      .map(resolver => resolver(params)),
+  );
+}

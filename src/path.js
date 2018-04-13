@@ -74,26 +74,30 @@ export function getParams(path: Path) {
   );
 }
 
+export function getRoutePath(path: Path, routes: Route[]): Route[] {
+  let currentChildren = routes;
+  // $FlowIssue flow doesn't seem to work with filter
+  return path.map(({routeIndex}) => {
+    invariant(
+      currentChildren,
+      'Attempted to get components for an invalid path.',
+    );
+    const route = currentChildren[routeIndex];
+
+    invariant(route, 'Attempted to get components for an invalid path.');
+
+    currentChildren = route.children;
+    return route;
+  });
+}
+
 export function getComponents(
   path: Path,
   routes: Route[],
 ): ComponentType<any>[] {
-  let currentChildren = routes;
-  // $FlowIssue flow doesn't seem to work with filter
-  return path
-    .map(({routeIndex}) => {
-      invariant(
-        currentChildren,
-        'Attempted to get components for an invalid path.',
-      );
-      const route = currentChildren[routeIndex];
-
-      invariant(route, 'Attempted to get components for an invalid path.');
-
-      currentChildren = route.children;
-      return route.component;
-    })
-    .filter(component => component);
+  return getRoutePath(path, routes)
+    .map(({component}) => component)
+    .filter(Boolean);
 }
 
 export function matches(routePath: string, pathname: string) {
