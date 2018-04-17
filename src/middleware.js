@@ -89,20 +89,43 @@ export const createMiddleware = (
           .map(component => component['@@redial-hooks'])
           .filter(Boolean);
 
-        const dependencyParams = {store, params, location, ...dependencyLocals};
+        const dependencyParams = {
+          store,
+          dispatch: store.dispatch,
+          getState: store.getState,
+          params,
+          location,
+          ...dependencyLocals,
+        };
 
         return resolveDependencies(dependencies, 'required', dependencyParams)
-          .then(() => {
-            resolveDependencies(dependencies, 'deferred', dependencyParams);
-            resolveDependencies(dependencies, 'clientSide', dependencyParams);
+          .then(async () => {
+            const deferred = resolveDependencies(
+              dependencies,
+              'deferred',
+              dependencyParams,
+              true,
+            );
+
+            if (typeof window === 'undefined') {
+              await deferred;
+            } else {
+              resolveDependencies(
+                dependencies,
+                'clientSide',
+                dependencyParams,
+                true,
+              );
+            }
 
             return {path, params};
           })
-          .catch(error =>
+          .catch(error => {
             // TODO (kyle): 500
+            console.error('Error fetching required', error);
 
-            ({path, params}),
-          );
+            return {path, params};
+          });
       })
       .then(({path, params}) =>
         next(route({path, params, location: createLocation(location)})),
@@ -121,11 +144,19 @@ export const createMiddleware = (
   return next(action);
 };
 
-function resolveDependencies(dependencies, name, params) {
-  return Promise.all(
+function resolveDependencies(dependencies, name, params, handleErrors = false) {
+  let promise = Promise.all(
     dependencies
       .map(deps => deps[name])
       .filter(Boolean)
       .map(resolver => resolver(params)),
   );
+
+  if (handleErrors) {
+    promise = promise.catch(error => {
+      console.error('Error fetching', error);
+    });
+  }
+
+  return promise;
 }
