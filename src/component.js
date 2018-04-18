@@ -8,17 +8,25 @@ import {connect} from 'react-redux';
 import Routes from './routes';
 
 
-type Props = {
+type Props<E: Object> = {
   routes: Routes,
+  // TODO (kyle): this is for backwards compatibility and probably isn't necessary.
+  extras: E,
 } & State;
 
 const mapStateToProps = ({router}) => router;
 
-const Router = ({routes, location, path, params}: Props) => routes
-  .getComponents(path)
-  .reduceRight(
-    (tree, component) =>
-      React.createElement(component, {location, params}, tree),
-    null,
-  );
+const Router = <E: Object>({
+  routes,
+  location,
+  path,
+  params,
+  extras,
+}: Props<E>) => routes
+    .getComponents(path)
+    .reduceRight(
+      (tree, component) =>
+        React.createElement(component, {...extras, location, params}, tree),
+      null,
+    );
 export default connect(mapStateToProps)(Router);

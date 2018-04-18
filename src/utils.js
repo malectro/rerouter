@@ -34,7 +34,7 @@ export function stringifyLocation(location: LocationType) {
       search = stringify(query);
     }
 
-    location = pathname + (search || '');
+    location = pathname + (search ? `?${search}` : '');
   }
   return location;
 }
