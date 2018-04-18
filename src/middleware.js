@@ -72,6 +72,8 @@ export const createMiddleware = (
       // TODO (kyle): consider allowing @@redux/INIT
     }
 
+    const parsedLocation = createLocation(location);
+
     return routes
       .resolve(location.pathname)
       .then(async resolution => {
@@ -94,7 +96,7 @@ export const createMiddleware = (
           dispatch: store.dispatch,
           getState: store.getState,
           params,
-          location,
+          location: parsedLocation,
           ...dependencyLocals,
         };
 
@@ -128,7 +130,8 @@ export const createMiddleware = (
           });
       })
       .then(({path, params}) =>
-        next(route({path, params, location: createLocation(location)})),
+        // TODO (kyle): may need to rederrive the location from the path
+        next(route({path, params, location: parsedLocation})),
       );
   } else if (type === POP) {
     invariant(

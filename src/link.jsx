@@ -14,19 +14,35 @@ const mapStateToProps = ({router: {location}}) => ({
 
 class Link extends React.Component<{
   to: LocationType | (Location => LocationType),
+  className?: string,
+  activeClassName?: string,
   children: React.Node,
   location: Location,
   dispatch: Dispatch,
 }> {
   render() {
-    const {to, children, location, ...props} = this.props;
+    const {
+      to,
+      className,
+      activeClassName,
+      children,
+      location,
+      ...props
+    } = this.props;
     let href = to;
+
     if (typeof href === 'function') {
       href = href(location);
     }
     href = typeof href === 'string' ? href : href.pathname;
+
     return (
-      <a {...props} onClick={this.handleClick} href={href}>
+      <a
+        {...props}
+        className={href === location.pathname ? activeClassName : className}
+        onClick={this.handleClick}
+        href={href}
+      >
         {children}
       </a>
     );
