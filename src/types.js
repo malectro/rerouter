@@ -41,3 +41,4 @@ export type Action = {
 
 export type Dispatch = RerouterAction => any;
 export type GetState = () => State;
+export type ReduxStore = {dispatch: Dispatch, getState: GetState};

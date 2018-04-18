@@ -1,6 +1,6 @@
 // @flow
 
-import type {Route, Path, Params, Location, GetState, Dispatch} from './types';
+import type {Path, Params, Location, ReduxStore} from './types';
 import type {RerouterAction} from './actions';
 import type {State} from './reducer';
 
@@ -10,7 +10,6 @@ import {PUSH, REPLACE, POP, HANDLE_POP, handlePop, route} from './actions';
 import reduce from './reducer';
 import Routes from './routes';
 import {createLocation, stringifyLocation} from './utils';
-import {match, getParams} from './path';
 
 
 export const applyRouter = (mainReducer: Function) => (
@@ -25,7 +24,7 @@ export const applyRouter = (mainReducer: Function) => (
   };
 };
 
-export const initDOMContext = store => {
+export const initDOMContext = (store: ReduxStore) => {
   window.addEventListener('popstate', () => {
     store.dispatch(handlePop());
   });
@@ -38,12 +37,16 @@ export const createMiddleware = (
   location: Location,
   history?: History,
   transitionHooks?: Array<
-    ({routes: Routes, path: Path, params: Params}) => Promise<any>,
+    (
+      {
+        routes: Routes,
+        location: Location,
+        store: ReduxStore,
+      },
+      {path: Path, params: Params},
+    ) => Promise<{path: Path, params: Params}>,
   > = [],
-  dependencyLocals?: {} = {},
-) => (store: {dispatch: Dispatch, getState: GetState}) => (next: Function) => (
-  action: RerouterAction,
-) => {
+) => (store: ReduxStore) => (next: Function) => (action: RerouterAction) => {
   const {type} = action;
 
   if (routeActions.has(type)) {
@@ -78,56 +81,13 @@ export const createMiddleware = (
       .resolve(location.pathname)
       .then(async resolution => {
         for (let i = 0; i < transitionHooks.length; i++) {
-          resolution = await transitionHooks[i](resolution);
+          resolution = await transitionHooks[i](
+            {routes, location: parsedLocation, store},
+            resolution,
+          );
         }
 
         return resolution;
-      })
-      .then(({path, params}) => {
-        // TODO (kyle): make this standard to the rerouter lib
-        // TODO (kyle): possibly have the app use Suspense for this
-        const dependencies = routes
-          .getComponents(path)
-          .map(component => component['@@redial-hooks'])
-          .filter(Boolean);
-
-        const dependencyParams = {
-          store,
-          dispatch: store.dispatch,
-          getState: store.getState,
-          params,
-          location: parsedLocation,
-          ...dependencyLocals,
-        };
-
-        return resolveDependencies(dependencies, 'required', dependencyParams)
-          .then(async () => {
-            const deferred = resolveDependencies(
-              dependencies,
-              'deferred',
-              dependencyParams,
-              true,
-            );
-
-            if (typeof window === 'undefined') {
-              await deferred;
-            } else {
-              resolveDependencies(
-                dependencies,
-                'clientSide',
-                dependencyParams,
-                true,
-              );
-            }
-
-            return {path, params};
-          })
-          .catch(error => {
-            // TODO (kyle): 500
-            console.error('Error fetching required', error);
-
-            return {path, params};
-          });
       })
       .then(({path, params}) =>
         // TODO (kyle): may need to rederrive the location from the path
@@ -146,20 +106,3 @@ export const createMiddleware = (
 
   return next(action);
 };
-
-function resolveDependencies(dependencies, name, params, handleErrors = false) {
-  let promise = Promise.all(
-    dependencies
-      .map(deps => deps[name])
-      .filter(Boolean)
-      .map(resolver => resolver(params)),
-  );
-
-  if (handleErrors) {
-    promise = promise.catch(error => {
-      console.error('Error fetching', error);
-    });
-  }
-
-  return promise;
-}
