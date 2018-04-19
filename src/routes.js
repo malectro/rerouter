@@ -1,8 +1,8 @@
 // @flow
 
-import type {Route, Path} from './types';
+import type {Route, PathNode, Path} from './types';
 
-import {match, getParams, getComponents} from './path';
+import {match, getParams, getRoutePath, getComponents} from './path';
 
 
 class Routes {
@@ -23,6 +23,10 @@ class Routes {
 
   getComponents(path: Path) {
     return getComponents(path, this.working);
+  }
+
+  getRoutePath(path: Path) {
+    return getRoutePath(path, this.working);
   }
 }
 

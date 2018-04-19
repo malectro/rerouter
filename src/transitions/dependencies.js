@@ -1,8 +1,8 @@
 // @flow
 
-import type {ReduxStore, Location, Path, Params} from './types';
+import type {ReduxStore, Location, Path, Params} from '../types';
 
-import Routes from './routes';
+import Routes from '../routes';
 
 
 export const createTransition = <D: Object>(dependencyLocals?: D) => async (

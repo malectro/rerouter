@@ -10,6 +10,7 @@ import {PUSH, REPLACE, POP, HANDLE_POP, handlePop, route} from './actions';
 import reduce from './reducer';
 import Routes from './routes';
 import {createLocation, stringifyLocation} from './utils';
+import {AbortError} from './errors';
 
 
 export const applyRouter = (mainReducer: Function) => (
@@ -89,9 +90,17 @@ export const createMiddleware = (
 
         return resolution;
       })
-      .then(({path, params}) =>
-        // TODO (kyle): may need to rederrive the location from the path
-        next(route({path, params, location: parsedLocation})),
+      .then(
+        ({path, params}) =>
+          // TODO (kyle): may need to rederrive the location from the path
+          next(route({path, params, location: parsedLocation})),
+        error => {
+          if (error instanceof AbortError) {
+            // pass
+          } else {
+            console.error('[rerouter] error during transition', error);
+          }
+        },
       );
   } else if (type === POP) {
     invariant(
