@@ -11,8 +11,8 @@ import Routes from './routes';
 export type Route = {
   path?: string,
   component?: React.ComponentType<*>,
-  getComponent?: () => Promise<React.ComponentType<*>>,
-  children?: Route[] | (() => Promise<Route[]>),
+  getComponent?: () => PossibleDefaultExport<React.ComponentType<*>>,
+  children?: Route[] | (() => PossibleDefaultExport<Route[]>),
 };
 
 export type PathNode = {
@@ -52,3 +52,10 @@ export type Transition = (
   meta: {routes: Routes, store: ReduxStore, location: Location},
   resolution: RouteResolution,
 ) => Promise<RouteResolution>;
+
+export type PossibleDefaultExport<Thing: Object> = Promise<
+  | {
+      default: Thing,
+    }
+  | Thing,
+>;

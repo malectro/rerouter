@@ -26,7 +26,7 @@ export async function match(routes: Route[], pathname: string) {
       if (matchInfo) {
         // NOTE (kyle): async load and monkey patch children
         if (typeof children === 'function') {
-          route.children = children = await children();
+          route.children = children = useDefault(await children());
         }
 
         const trail = await match(children, pathname.slice(matchInfo.length));
@@ -38,7 +38,7 @@ export async function match(routes: Route[], pathname: string) {
           });
 
           if (getComponent) {
-            route.component = await getComponent();
+            route.component = useDefault(await getComponent());
           }
 
           return trail;
@@ -52,7 +52,7 @@ export async function match(routes: Route[], pathname: string) {
       const matchInfo = matches(path, pathname);
       if (matchInfo && matchInfo.length === pathname.length) {
         if (getComponent) {
-          route.component = await getComponent();
+          route.component = useDefault(await getComponent());
         }
 
         return [
@@ -133,4 +133,8 @@ function pathToParams(path: string) {
     params.push(match[1]);
   }
   return params;
+}
+
+function useDefault<T: Object>(thing: {default: T} | T): T {
+  return thing.default || thing;
 }

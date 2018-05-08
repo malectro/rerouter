@@ -22,6 +22,7 @@ export {
 } from './transitions/redirect';
 export {default as SimpleHistory} from './history/simple';
 export {default as BrowserHistory} from './history/browser';
+export {ReplaceError, AbortError} from './errors';
 
 export type {State} from 'reducer';
 export type {Transition} from './types';
