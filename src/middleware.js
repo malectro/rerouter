@@ -80,6 +80,7 @@ export const createMiddleware = (
     return routes
       .resolve(parsedLocation.pathname)
       .then(async resolution => {
+        let replacementCount = 0;
         for (let i = 0; i < transitionHooks.length; i++) {
           try {
             resolution = await transitionHooks[i](
@@ -88,8 +89,16 @@ export const createMiddleware = (
             );
           } catch (error) {
             if (error instanceof ReplaceError) {
-              history.replace(error.location);
-              resolution = await routes.resolve(history.location.pathname);
+              replacementCount++;
+              if (replacementCount > 1) {
+                console.warn(
+                  'Multiple ReplaceErrors thrown in the same transition. Ignoring...',
+                );
+              } else {
+                history.replace(error.location);
+                resolution = await routes.resolve(history.location.pathname);
+                i = 0;
+              }
             } else {
               throw error;
             }
