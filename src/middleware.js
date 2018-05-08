@@ -3,14 +3,14 @@
 import type {Path, Params, Location, ReduxStore} from './types';
 import type {RerouterAction} from './actions';
 import type {State} from './reducer';
+import type {BaseHistory} from './history/base';
 
 import invariant from 'invariant';
 
 import {PUSH, REPLACE, POP, HANDLE_POP, handlePop, route} from './actions';
 import reduce from './reducer';
 import Routes from './routes';
-import {createLocation, stringifyLocation} from './utils';
-import {AbortError} from './errors';
+import {AbortError, ReplaceError} from './errors';
 
 
 export const applyRouter = (mainReducer: Function) => (
@@ -35,8 +35,7 @@ const routeActions = new Set([PUSH, REPLACE, HANDLE_POP]);
 
 export const createMiddleware = (
   routes: Routes,
-  location: Location,
-  history?: History,
+  history: BaseHistory,
   transitionHooks?: Array<
     (
       {
@@ -59,7 +58,7 @@ export const createMiddleware = (
             action.type
           } was dispatched without an initialized history. It is okay to not initialize history in a server-side context, but rerouter actions should never be dispatched.`,
         );
-        history.pushState({}, '', stringifyLocation(action.payload));
+        history.push(action.payload);
         break;
 
       case REPLACE:
@@ -69,23 +68,32 @@ export const createMiddleware = (
             action.type
           } was dispatched without an initialized history. It is okay to not initialize history in a server-side context, but rerouter actions should never be dispatched.`,
         );
-        history.replaceState({}, '', stringifyLocation(action.payload));
+        history.replace(action.payload);
         break;
 
       // HANDLE_POP does not modify history
       // TODO (kyle): consider allowing @@redux/INIT
     }
 
-    const parsedLocation = createLocation(location);
+    const parsedLocation = history.location;
 
     return routes
-      .resolve(location.pathname)
+      .resolve(parsedLocation.pathname)
       .then(async resolution => {
         for (let i = 0; i < transitionHooks.length; i++) {
-          resolution = await transitionHooks[i](
-            {routes, location: parsedLocation, store},
-            resolution,
-          );
+          try {
+            resolution = await transitionHooks[i](
+              {routes, location: history.location, store},
+              resolution,
+            );
+          } catch (error) {
+            if (error instanceof ReplaceError) {
+              history.replace(error.location);
+              resolution = await routes.resolve(history.location.pathname);
+            } else {
+              throw error;
+            }
+          }
         }
 
         return resolution;
@@ -93,7 +101,7 @@ export const createMiddleware = (
       .then(
         ({path, params}) =>
           // TODO (kyle): may need to rederrive the location from the path
-          next(route({path, params, location: parsedLocation})),
+          next(route({path, params, location: history.location})),
         error => {
           if (error instanceof AbortError) {
             // pass
@@ -110,7 +118,7 @@ export const createMiddleware = (
       } was dispatched without an initialized history. It is okay to not initialize history in a server-side context, but rerouter actions should never be dispatched.`,
     );
 
-    history.back();
+    history.pop();
   }
 
   return next(action);

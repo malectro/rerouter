@@ -17,8 +17,11 @@ export {
   default as createDependencyTransition,
 } from './transitions/dependencies';
 export {
-  createBrowserRedirectTransition,
+  browserRedirectTransition,
   createCustomRedirectTransition,
 } from './transitions/redirect';
+export {default as SimpleHistory} from './history/simple';
+export {default as BrowserHistory} from './history/browser';
 
 export type {State} from 'reducer';
+export type {Transition} from './types';

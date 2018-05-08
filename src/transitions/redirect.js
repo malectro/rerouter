@@ -2,21 +2,18 @@
 
 import type {Transition} from '../types';
 
-import {AbortError} from '../errors';
+import {AbortError, ReplaceError} from '../errors';
 
 
-export const createBrowserRedirectTransition = (
-  history?: History,
-): Transition => async ({routes}, resolution) => {
+export const browserRedirectTransition: Transition = async (
+  {routes},
+  resolution,
+) => {
   const {path} = resolution;
   const redirect = getRedirect(routes, path);
 
   if (redirect) {
-    resolution = await routes.resolve(redirect);
-
-    if (history) {
-      history.replaceState({}, '', redirect);
-    }
+    throw new ReplaceError(redirect);
   }
 
   return resolution;

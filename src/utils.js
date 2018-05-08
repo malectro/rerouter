@@ -6,7 +6,7 @@ import {parse, stringify} from 'querystringify';
 
 
 export function createLocation(
-  location: LocationType = {
+  location: LocationType | Location = {
     pathname: '',
     search: '',
     query: {},
@@ -25,13 +25,13 @@ export function createLocation(
   };
 }
 
-export function stringifyLocation(location: LocationType) {
+export function stringifyLocation(location: LocationType | Location) {
   if (typeof location !== 'string') {
-    const {pathname = '', query} = location;
+    const {pathname = ''} = location;
     let {search} = location;
 
-    if (query) {
-      search = stringify(query);
+    if (location.query) {
+      search = stringify(location.query);
     }
 
     location = pathname + (search ? `?${search}` : '');
