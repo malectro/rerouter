@@ -1,12 +1,12 @@
 // @flow
 
 import type {LocationType, Location} from '../types';
+import type {BaseHistory} from './base';
 
-import {BaseHistory} from './base';
 import {createLocation} from '../utils';
 
 
-export default class SimpleHistory extends BaseHistory {
+export default class SimpleHistory implements BaseHistory {
   location: Location;
   _stack: {location: Location, state: Object}[];
 

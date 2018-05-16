@@ -31,6 +31,8 @@ export const initDOMContext = (store: ReduxStore) => {
   });
 };
 
+const rerouterActions = new Set([PUSH, REPLACE, POP, HANDLE_POP]);
+const historyActions = new Set([PUSH, REPLACE, POP]);
 const routeActions = new Set([PUSH, REPLACE, HANDLE_POP]);
 
 export const createMiddleware = (
@@ -46,94 +48,111 @@ export const createMiddleware = (
       {path: Path, params: Params},
     ) => Promise<{path: Path, params: Params}>,
   > = [],
-) => (store: ReduxStore) => (next: () => mixed) => (action: RerouterAction) => {
-  const {type} = action;
+      ) => (store: ReduxStore) => (next: () => mixed) => {
+  async function dispatchRerouterAction(action: RerouterAction) {
+    const {type} = action;
 
-  if (routeActions.has(type)) {
-    switch (action.type) {
-      case PUSH:
-        invariant(
-          history,
-          `The rerouter action ${
-            action.type
-          } was dispatched without an initialized history. It is okay to not initialize history in a server-side context, but rerouter actions should never be dispatched.`,
-        );
-        history.push(action.payload);
-        break;
-
-      case REPLACE:
-        invariant(
-          history,
-          `The rerouter action ${
-            action.type
-          } was dispatched without an initialized history. It is okay to not initialize history in a server-side context, but rerouter actions should never be dispatched.`,
-        );
-        history.replace(action.payload);
-        break;
-
-      // HANDLE_POP does not modify history
-      // TODO (kyle): consider allowing @@redux/INIT
+    if (historyActions.has(type)) {
+      try {
+        await history.leave();
+      } catch (error) {
+        if (error instanceof AbortError) {
+          // pass
+        } else {
+          console.error('Attempting to leave route.', error);
+        }
+      }
     }
 
-    console.log('het', history.location);
-    const parsedLocation = history.location;
+    if (routeActions.has(type)) {
+      switch (action.type) {
+        case PUSH:
+          invariant(
+            history,
+            `The rerouter action ${
+              action.type
+            } was dispatched without an initialized history. It is okay to not initialize history in a server-side context, but rerouter actions should never be dispatched.`,
+          );
+          history.push(action.payload);
+          break;
 
-    return routes
-      .resolve(parsedLocation.pathname)
-      .then(async resolution => {
-        console.log('het');
-        let replacementCount = 0;
-        for (let i = 0; i < transitionHooks.length; i++) {
-          try {
-            resolution = await transitionHooks[i](
-              {routes, location: history.location, store},
-              resolution,
-            );
-          } catch (error) {
-            if (error instanceof ReplaceError) {
-              replacementCount++;
-              if (replacementCount > 1) {
-                console.warn(
-                  'Multiple ReplaceErrors thrown in the same transition. Ignoring...',
-                );
+        case REPLACE:
+          invariant(
+            history,
+            `The rerouter action ${
+              action.type
+            } was dispatched without an initialized history. It is okay to not initialize history in a server-side context, but rerouter actions should never be dispatched.`,
+          );
+          history.replace(action.payload);
+          break;
+
+        // HANDLE_POP does not modify history
+        // TODO (kyle): consider allowing @@redux/INIT
+      }
+
+      const parsedLocation = history.location;
+
+      return routes
+        .resolve(parsedLocation.pathname)
+        .then(async resolution => {
+          let replacementCount = 0;
+          for (let i = 0; i < transitionHooks.length; i++) {
+            try {
+              resolution = await transitionHooks[i](
+                {routes, location: history.location, store},
+                resolution,
+              );
+            } catch (error) {
+              if (error instanceof ReplaceError) {
+                replacementCount++;
+                if (replacementCount > 1) {
+                  console.warn(
+                    'Multiple ReplaceErrors thrown in the same transition. Ignoring...',
+                  );
+                } else {
+                  history.replace(error.location);
+                  resolution = await routes.resolve(history.location.pathname);
+                  i = 0;
+                }
               } else {
-                console.log('replacing');
-                history.replace(error.location);
-                resolution = await routes.resolve(history.location.pathname);
-                i = 0;
+                throw error;
               }
-            } else {
-              throw error;
             }
           }
-        }
 
-        console.log('hey');
-
-        return resolution;
-      })
-      .then(
-        ({path, params}) =>
-          // TODO (kyle): may need to rederrive the location from the path
-          next(route({path, params, location: history.location})),
-        error => {
-          if (error instanceof AbortError) {
-            // pass
-          } else {
-            console.error('[rerouter] error during transition', error);
-          }
-        },
+          return resolution;
+        })
+        .then(
+          ({path, params}) =>
+            // TODO (kyle): may need to rederrive the location from the path
+            next(route({path, params, location: history.location})),
+          error => {
+            if (error instanceof AbortError) {
+              // pass
+            } else {
+              console.error('[rerouter] error during transition', error);
+            }
+          },
+        );
+    } else if (type === POP) {
+      invariant(
+        history,
+        `The rerouter action ${
+          action.type
+        } was dispatched without an initialized history. It is okay to not initialize history in a server-side context, but rerouter actions should never be dispatched.`,
       );
-  } else if (type === POP) {
-    invariant(
-      history,
-      `The rerouter action ${
-        action.type
-      } was dispatched without an initialized history. It is okay to not initialize history in a server-side context, but rerouter actions should never be dispatched.`,
-    );
 
-    history.pop();
+      history.pop();
+    }
+
+    return next(action);
   }
 
-  return next(action);
+  return (action: RerouterAction) => {
+    if (rerouterActions.has(action.type)) {
+      return dispatchRerouterAction(action);
+    }
+
+    return next(action);
+  };
 };
