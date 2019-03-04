@@ -1,3 +1,6 @@
+import '@babel/polyfill';
+
+
 export {
   PUSH,
   REPLACE,
@@ -11,6 +14,7 @@ export {
 export {default as Link} from './link.jsx';
 export {default as Provider} from './component';
 export {applyRouter, initDOMContext, createMiddleware} from './middleware';
+export {default as reduce} from './reducer';
 export {match, getParams, getComponents} from './path';
 export {default as Routes} from './routes';
 export {

@@ -20,13 +20,14 @@
     "test": "jest"
   },
   "devDependencies": {
-    "@babel/cli": "^7.0.0-beta.39",
-    "@babel/core": "^7.0.0-beta.39",
-    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.39",
-    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.39",
-    "@babel/preset-env": "^7.0.0-beta.39",
-    "@babel/preset-flow": "^7.0.0-beta.39",
-    "@babel/preset-react": "^7.0.0-beta.39",
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
+    "@babel/plugin-proposal-class-properties": "^7.0.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+    "@babel/polyfill": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/preset-flow": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
     "babel-core": "^7.0.0-0",
     "babel-eslint": "^8.2.1",
     "babel-jest": "^22.2.2",
@@ -37,7 +38,10 @@
     "flow-bin": "^0.64.0",
     "flow-typed": "^2.3.0",
     "jest": "^22.2.2",
-    "prettier": "^1.10.2"
+    "prettier": "^1.10.2",
+    "react": "^16.0.0",
+    "react-redux": "^5.0.0",
+    "redux": "^3.0.0"
   },
   "peerDependencies": {
     "react": ">=16",

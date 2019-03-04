@@ -22,11 +22,14 @@ const Router = <E: Object>({
   path,
   params,
   extras,
-}: Props<E>) => routes
+}: Props<E>) => {
+  console.log('rendering routes');
+  return routes
     .getComponents(path)
     .reduceRight(
       (tree, component) =>
         React.createElement(component, {...extras, location, params}, tree),
       null,
     );
+};
 export default connect(mapStateToProps)(Router);

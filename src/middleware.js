@@ -46,7 +46,7 @@ export const createMiddleware = (
       {path: Path, params: Params},
     ) => Promise<{path: Path, params: Params}>,
   > = [],
-) => (store: ReduxStore) => (next: Function) => (action: RerouterAction) => {
+) => (store: ReduxStore) => (next: () => mixed) => (action: RerouterAction) => {
   const {type} = action;
 
   if (routeActions.has(type)) {
@@ -75,11 +75,13 @@ export const createMiddleware = (
       // TODO (kyle): consider allowing @@redux/INIT
     }
 
+    console.log('het', history.location);
     const parsedLocation = history.location;
 
     return routes
       .resolve(parsedLocation.pathname)
       .then(async resolution => {
+        console.log('het');
         let replacementCount = 0;
         for (let i = 0; i < transitionHooks.length; i++) {
           try {
@@ -95,6 +97,7 @@ export const createMiddleware = (
                   'Multiple ReplaceErrors thrown in the same transition. Ignoring...',
                 );
               } else {
+                console.log('replacing');
                 history.replace(error.location);
                 resolution = await routes.resolve(history.location.pathname);
                 i = 0;
@@ -104,6 +107,8 @@ export const createMiddleware = (
             }
           }
         }
+
+        console.log('hey');
 
         return resolution;
       })

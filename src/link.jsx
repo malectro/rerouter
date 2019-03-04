@@ -16,6 +16,7 @@ class Link extends React.Component<{
   to: LocationType | (Location => LocationType),
   className?: string,
   activeClassName?: string,
+  onlyActiveOnIndex?: boolean,
   children: React.Node,
   location: Location,
   dispatch: Dispatch,
@@ -25,8 +26,10 @@ class Link extends React.Component<{
       to,
       className,
       activeClassName,
+      onlyActiveOnIndex,
       children,
       location,
+      dispatch: _,
       ...props
     } = this.props;
     let href = to;
@@ -36,10 +39,12 @@ class Link extends React.Component<{
     }
     href = typeof href === 'string' ? href : href.pathname;
 
+    const isActive = onlyActiveOnIndex ? location.pathname.startsWith(href) : href === location.pathname;
+
     return (
       <a
         {...props}
-        className={href === location.pathname ? activeClassName : className}
+        className={isActive ? activeClassName : className}
         onClick={this.handleClick}
         href={href}
       >
