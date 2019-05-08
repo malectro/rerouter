@@ -47,6 +47,11 @@ export default class BrowserHistory implements BaseHistory {
     window.addEventListener('popstate', () => {
       this.handlePopState();
     });
+
+    window.addEventListener('beforeunload', event => {
+      console.log('unloading');
+      return this.handleBeforeUnload(event);
+    });
   }
 
   generateState<S>(subState: S): HistoryState<S> {
@@ -79,7 +84,14 @@ export default class BrowserHistory implements BaseHistory {
     return createLocation(this._browserLocation);
   }
 
-  async handlePopState() {
+  handleBeforeUnload(event: BeforeUnloadEvent) {
+    const response = this.leaveSync();
+    if (response) {
+      (event || window.event).returnValue = response;
+    }
+  }
+
+  handlePopState() {
     // if this event was triggered by an aborted transition, we ignore it.
     if (this._abortingPopState) {
       this._abortingPopState = false;
@@ -123,6 +135,18 @@ export default class BrowserHistory implements BaseHistory {
 
   removeLeaveHook(leaveHook: LeaveHook) {
     this._leaveHooks.delete(leaveHook);
+  }
+
+  leaveSync() {
+    const nextLocation = this.location;
+    for (const hook of this._leaveHooks) {
+      const response = hook(nextLocation);
+      if (response) {
+        if (typeof response === 'string') {
+          return response;
+        }
+      }
+    }
   }
 
   async leave() {
