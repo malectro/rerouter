@@ -1,39 +1,73 @@
 // @flow
 
-import type {Location as LocationObject, LocationType} from '../types';
+import type {Location as LocationObject, LocationType, LeaveHook, PopStateListener} from '../types';
 import type {BaseHistory} from './base';
 
 import {AbortError} from '../errors';
 import {createLocation, stringifyLocation} from '../utils';
 
 
-type LeaveHook = (
-  nextLocation: LocationObject,
-) => void | string | Promise<void>;
+type HistoryState<S> = {
+  index: number,
+  subState: S,
+};
+
+// decide whether or not to keep the virtual stack in history or in the middleware
+//
+// we should prevent transitions by resetting the browserHistory stack to
+// the previous position.
 
 export default class BrowserHistory implements BaseHistory {
+  // TODO (kyle): not sure it is necessary to keep a secondary stack
+  _stack: {location: LocationType, state: HistoryState<mixed>}[] = [];
+  _currentStackIndex = 0;
+
+  _leaveHooks: Set<LeaveHook> = new Set();
+  _popStateListeners: Set<PopStateListener> = new Set();
+
   _browserHistory: History;
   _browserLocation: Location;
-  _leaveHooks: Set<LeaveHook>;
-  _popStateListeners: Set<() => any>;
+
+  _abortingPopState = false;
 
   constructor(browserHistory: History, location: Location) {
-    super();
     this._browserHistory = browserHistory;
     this._browserLocation = location;
-    this._leaveHooks = new Set();
-    this._popStateListeners = new Set();
+    this._currentStackIndex = (browserHistory.state && browserHistory.state.index) || 0;
+
+    if (!browserHistory.state) {
+      this._browserHistory.replaceState(
+        this.generateState(),
+        '',
+      );
+    }
+
+    window.rerouterHistory = this;
 
     window.addEventListener('popstate', () => {
       this.handlePopState();
     });
   }
 
-  push(location: LocationType, state: Object = {}) {
+  generateState<S>(subState: S): HistoryState<S> {
+    return {
+      index: this._currentStackIndex,
+      subState,
+    };
+  }
+
+  push(location: LocationType, subState: mixed = null) {
+    this._currentStackIndex++;
+    const state = this.generateState(subState);
+
+    this._stack = [...this._stack.slice(0, this._currentStackIndex), {location, state}];
     this._browserHistory.pushState(state, '', stringifyLocation(location));
   }
 
-  replace(location: LocationType, state: Object = {}) {
+  replace(location: LocationType, subState: mixed = null) {
+    const state = this.generateState(subState);
+
+    this._stack[this._currentStackIndex] = {location, state};
     this._browserHistory.replaceState(state, '', stringifyLocation(location));
   }
 
@@ -45,7 +79,40 @@ export default class BrowserHistory implements BaseHistory {
     return createLocation(this._browserLocation);
   }
 
-  handlePopState() {}
+  async handlePopState() {
+    // if this event was triggered by an aborted transition, we ignore it.
+    if (this._abortingPopState) {
+      this._abortingPopState = false;
+      return;
+    }
+
+    const nextIndex = (this._browserHistory.state || {}).index;
+
+    // if the nextIndex matches the currentIndex it means this
+    // pop event was due to an Abort from a previous pop.
+    if (nextIndex === this._currentIndex) {
+      return;
+    }
+
+    try {
+      console.log('history leaving');
+      await this.leave();
+
+      for (const listener of this._popStateListeners) {
+        listener();
+      }
+    } catch (error) {
+      if (error instanceof AbortError) {
+        console.log('routing aborted');
+
+        if (Number.isInteger(nextIndex)) {
+          console.log('going', nextIndex, nextIndex - this._currentStackIndex);
+          this._abortingPopState = true;
+          this._browserHistory.go(this._currentStackIndex - nextIndex);
+        }
+      }
+    }
+  }
 
   addLeaveHook(leaveHook: LeaveHook) {
     this._leaveHooks.add(leaveHook);
@@ -59,8 +126,11 @@ export default class BrowserHistory implements BaseHistory {
   }
 
   async leave() {
+    const nextLocation = this.location;
+    console.log('leaving', this._leaveHooks);
     for (const hook of this._leaveHooks) {
       const response = hook(nextLocation);
+      console.log('response', response);
       if (response) {
         if (typeof response === 'string') {
           // eslint-disable-next-line no-alert
@@ -72,5 +142,16 @@ export default class BrowserHistory implements BaseHistory {
         }
       }
     }
+  }
+
+  addPopStateListener(listener: PopStateListener) {
+    this._popStateListeners.add(listener);
+    return () => {
+      this._popStateListeners.delete(listener);
+    };
+  }
+
+  removePopStateListener(listener: () => mixed) {
+    this._popStateListeners.delete(listener);
   }
 }

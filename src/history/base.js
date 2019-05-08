@@ -1,6 +1,6 @@
 // @flow
 
-import type {LocationType, Location} from '../types';
+import type {LocationType, Location, LeaveHook, PopStateListener} from '../types';
 
 
 export interface BaseHistory {
@@ -9,4 +9,6 @@ export interface BaseHistory {
   pop(): void;
   get location(): Location;
   leave(): Promise<void>;
+  addPopStateListener(PopStateListener): () => void;
+  addLeaveHook(LeaveHook): () => void;
 }

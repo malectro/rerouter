@@ -44,7 +44,7 @@ class Link extends React.Component<{
     return (
       <a
         {...props}
-        className={isActive ? activeClassName : className}
+        className={isActive && activeClassName ? activeClassName : className}
         onClick={this.handleClick}
         href={href}
       >

@@ -53,6 +53,12 @@ export type Transition = (
   resolution: RouteResolution,
 ) => Promise<RouteResolution>;
 
+export type LeaveHook = (
+  nextLocation: Location,
+) => void | string | Promise<void>;
+
+export type PopStateListener = () => mixed;
+
 export type PossibleDefaultExport<Thing: Object> = Promise<
   | {
       default: Thing,
