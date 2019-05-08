@@ -3,6 +3,7 @@
 import type {ReduxStore, Location, Path, Params} from '../types';
 
 import Routes from '../routes';
+import {RouterError} from '../errors';
 
 
 export const createTransition = <D: Object>(dependencyLocals?: D) => async (
@@ -32,9 +33,14 @@ export const createTransition = <D: Object>(dependencyLocals?: D) => async (
   try {
     await resolveDependencies(dependencies, 'required', dependencyParams);
   } catch (error) {
-    // TODO (kyle): 500
-    console.error('Error fetching required', error);
-    return {path, params};
+    // dependencies are allowed to throw router errors
+    if (error instanceof RouterError) {
+      throw error;
+    } else {
+      // TODO (kyle): 500
+      console.error('Error fetching required', error);
+      return {path, params};
+    }
   }
 
   try {
