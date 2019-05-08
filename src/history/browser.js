@@ -84,14 +84,14 @@ export default class BrowserHistory implements BaseHistory {
     return createLocation(this._browserLocation);
   }
 
-  handleBeforeUnload(event: BeforeUnloadEvent) {
+  handleBeforeUnload(event: Event & {returnValue?: mixed}) {
     const response = this.leaveSync();
     if (response) {
       (event || window.event).returnValue = response;
     }
   }
 
-  handlePopState() {
+  async handlePopState(event: Event) {
     // if this event was triggered by an aborted transition, we ignore it.
     if (this._abortingPopState) {
       this._abortingPopState = false;
