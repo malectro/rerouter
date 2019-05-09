@@ -8,11 +8,16 @@ import invariant from 'invariant';
 
 
 // TODO (kyle): handle failed async route resolution
-export async function match<C>(routes: RouteCollection<C>, pathname: string, context: C) {
+export async function match<C>(routes: RouteCollection<C>, pathname: string, context: C): Promise<Path> {
   routes = resolveRoutes(routes, context);
 
   for (let i = 0; i < routes.length; i++) {
     const route = routes[i];
+
+    if (!route) {
+      continue;
+    }
+
     const {path, getComponent, loadChildren} = route;
     let {children} = route;
 
@@ -48,11 +53,7 @@ export async function match<C>(routes: RouteCollection<C>, pathname: string, con
           return trail;
         }
       }
-
-      // NOTE (kyle): trick to check if string is defined
-    }
-
-    if (path != null) {
+    } else if (path != null) {
       const matchInfo = matches(path, pathname);
       if (matchInfo && matchInfo.length === pathname.length) {
         if (getComponent) {
@@ -127,7 +128,16 @@ export function matches(routePath: string, pathname: string) {
 
 export function pathToRegex(path: string) {
   const params = pathToParams(path);
-  const string = path.replace(/:([^\/]+)/g, '([^/]+)').replace('*', '.*');
+  const string = path.replace(/(?:\(([^\)]+)\))|(?::([^\/]+))|(\*)/g, (_match, optional, param, wildcard) => {
+    if (optional) {
+      return `(?:${optional})?`;
+    } else if (param) {
+      return '([^/]+)';
+    } else if (wildcard) {
+      return '.*';
+    }
+  });
+  console.log('hio', string);
   return {
     regex: new RegExp(`^/?${string}`),
     params,

@@ -7,6 +7,15 @@ const routes = [
     children: [
       {path: 'frogs', component: () => {}},
       {
+        path: 'func',
+        children: context => [
+          context && {path: '', component: () => {}},
+          context && context.hello ?
+            {path: 'hello', component: () => {}}
+            : {path: 'hi', component: () => {}},
+        ],
+      },
+      {
         path: '*',
         component: () => {},
       },
@@ -15,14 +24,35 @@ const routes = [
 ];
 
 describe('match', () => {
-  test('404', () => {
-    const path = match(routes, 'bad/path');
+  const notFoundPath = [
+    {
+      routeIndex: 0,
+      part: undefined,
+      params: {},
+    },
+    {routeIndex: 2, part: '*', params: {}},
+  ];
+
+  test('404', async () => {
+    const path = await match(routes, 'bad/path');
+    expect(path).toEqual(notFoundPath);
+  });
+
+  test('404 functional children', async () => {
+    const path = await match(routes, 'func');
+    expect(path).toEqual(notFoundPath);
+  });
+
+  test('valid functional children', async () => {
+    const path = await match(routes, 'func', true);
     expect(path).toEqual([
       {
         routeIndex: 0,
+        part: undefined,
         params: {},
       },
-      {routeIndex: 1, part: '*', params: {}},
+      {routeIndex: 1, part: 'func', params: {}},
+      {routeIndex: 0, part: '', params: {}},
     ]);
   });
 });
@@ -43,20 +73,20 @@ describe('getComponents', () => {
   test('path to 404', () => {
     const path = [
       {routeIndex: 0, params: {}, part: null},
-      {routeIndex: 1, params: {}, part: '*'},
+      {routeIndex: 2, params: {}, part: '*'},
     ];
 
     expect(getComponents(path, routes)).toEqual([
       routes[0].component,
-      routes[0].children[1].component,
+      routes[0].children[2].component,
     ]);
   });
 });
 
 describe('pathToRegex', () => {
   test('converts', () => {
-    expect(pathToRegex('root/:id/:id2/page/*/page2')).toEqual({
-      regex: /^\/?root\/([^/]+)\/([^/]+)\/page\/.*\/page2/,
+    expect(pathToRegex('root/:id/:id2/page(s)/*/page2')).toEqual({
+      regex: /^\/?root\/([^/]+)\/([^/]+)\/page(?:s)?\/.*\/page2/,
       params: ['id', 'id2'],
     });
   });
