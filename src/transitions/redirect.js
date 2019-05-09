@@ -20,7 +20,7 @@ export const browserRedirectTransition: Transition = async (
 };
 
 export const createCustomRedirectTransition = (
-  onRedirect: string => any,
+  onRedirect: string => mixed,
 ): Transition => async ({routes}, resolution) => {
   const {path} = resolution;
   const redirect = getRedirect(routes, path);

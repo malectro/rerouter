@@ -26,6 +26,7 @@ export {
 } from './transitions/redirect';
 export {default as SimpleHistory} from './history/simple';
 export {default as BrowserHistory} from './history/browser';
+export {default as ServerHistory} from './history/server';
 export {ReplaceError, AbortError} from './errors';
 
 export type {State} from 'reducer';

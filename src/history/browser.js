@@ -49,7 +49,6 @@ export default class BrowserHistory implements BaseHistory {
     });
 
     window.addEventListener('beforeunload', event => {
-      console.log('unloading');
       return this.handleBeforeUnload(event);
     });
   }
@@ -107,7 +106,6 @@ export default class BrowserHistory implements BaseHistory {
     }
 
     try {
-      console.log('history leaving');
       await this.leave();
 
       for (const listener of this._popStateListeners) {
@@ -115,10 +113,8 @@ export default class BrowserHistory implements BaseHistory {
       }
     } catch (error) {
       if (error instanceof AbortError) {
-        console.log('routing aborted');
 
         if (Number.isInteger(nextIndex)) {
-          console.log('going', nextIndex, nextIndex - this._currentStackIndex);
           this._abortingPopState = true;
           this._browserHistory.go(this._currentStackIndex - nextIndex);
         }
@@ -151,10 +147,8 @@ export default class BrowserHistory implements BaseHistory {
 
   async leave() {
     const nextLocation = this.location;
-    console.log('leaving', this._leaveHooks);
     for (const hook of this._leaveHooks) {
       const response = hook(nextLocation);
-      console.log('response', response);
       if (response) {
         if (typeof response === 'string') {
           // eslint-disable-next-line no-alert
