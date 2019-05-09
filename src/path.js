@@ -1,18 +1,22 @@
 // @flow
 
 import type {ComponentType} from 'react';
-import type {Route, Path} from './types';
+import type {Route, RouteCollection, Path} from './types';
 
 import invariant from 'invariant';
 
+
+
 // TODO (kyle): handle failed async route resolution
-export async function match(routes: Route[], pathname: string) {
+export async function match<C>(routes: RouteCollection<C>, pathname: string, context: C) {
+  routes = resolveRoutes(routes, context);
+
   for (let i = 0; i < routes.length; i++) {
     const route = routes[i];
-    const {path, getComponent} = route;
+    const {path, getComponent, loadChildren} = route;
     let {children} = route;
 
-    if (children) {
+    if (children || loadChildren) {
       let matchInfo;
       if (!path) {
         matchInfo = {
@@ -25,11 +29,11 @@ export async function match(routes: Route[], pathname: string) {
 
       if (matchInfo) {
         // NOTE (kyle): async load and monkey patch children
-        if (typeof children === 'function') {
-          route.children = children = useDefault(await children());
+        if (!route.children && route.loadChildren) {
+          route.children = children = useDefault(await route.loadChildren());
         }
 
-        const trail = await match(children, pathname.slice(matchInfo.length));
+        const trail = await match(children, pathname.slice(matchInfo.length), context);
         if (trail && trail.length > 0) {
           trail.unshift({
             part: path,
@@ -74,8 +78,12 @@ export function getParams(path: Path) {
   );
 }
 
-export function getRoutePath(path: Path, routes: Route[]): Route[] {
-  let currentChildren = routes;
+function resolveRoutes<C>(routes: RouteCollection<C>, context: C): Array<Route<C>> {
+  return typeof routes === 'function' ? routes(context) : routes;
+}
+
+export function getRoutePath<C>(path: Path, routes: RouteCollection<C>, context: C): Route<C>[] {
+  let currentChildren = resolveRoutes(routes, context);
   // $FlowIssue flow doesn't seem to work with filter
   return path.map(({routeIndex}) => {
     invariant(
@@ -86,16 +94,17 @@ export function getRoutePath(path: Path, routes: Route[]): Route[] {
 
     invariant(route, 'Attempted to get components for an invalid path.');
 
-    currentChildren = route.children;
+    currentChildren = route.children ? resolveRoutes(route.children, context) : null;
     return route;
   });
 }
 
-export function getComponents(
+export function getComponents<C>(
   path: Path,
-  routes: Route[],
-): ComponentType<any>[] {
-  return getRoutePath(path, routes)
+  routes: Route<C>[],
+  context: C,
+): ComponentType<mixed>[] {
+  return getRoutePath(path, routes, context)
     .map(({component}) => component)
     .filter(Boolean);
 }

@@ -1,6 +1,6 @@
 // @flow
 
-import type {Path, Params, Location, ReduxStore, Transition} from './types';
+import type {ReduxStore, Transition} from './types';
 import type {RerouterAction} from './actions';
 import type {State} from './reducer';
 import type {BaseHistory} from './history/base';
@@ -29,8 +29,8 @@ const rerouterActions = new Set([PUSH, REPLACE, POP, HANDLE_POP]);
 const historyActions = new Set([PUSH, REPLACE, POP]);
 const routeActions = new Set([PUSH, REPLACE, HANDLE_POP]);
 
-export const createMiddleware = (
-  routes: Routes,
+export const createMiddleware = <C>(
+  routes: Routes<C>,
   history: BaseHistory,
   transitionHooks?: Array<Transition> = [],
 ) => (store: ReduxStore) => {

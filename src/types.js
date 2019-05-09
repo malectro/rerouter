@@ -8,12 +8,15 @@ import * as React from 'react';
 import Routes from './routes';
 
 
-export type Route = {
+export type Route<C> = {
   path?: string,
   component?: React.ComponentType<*>,
-  getComponent?: () => PossibleDefaultExport<React.ComponentType<*>>,
-  children?: Route[] | (() => PossibleDefaultExport<Route[]>),
+  getComponent?: () => PossibleDefaultExport<React.ComponentType<mixed>>,
+  children?: RouteCollection<C>,
+  loadChildren?: () => PossibleDefaultExport<RouteCollection<C>>,
 };
+
+export type RouteCollection<C> = Route<C>[] | (C) => Route<C>[];
 
 export type PathNode = {
   part: ?string,
