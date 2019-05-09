@@ -1,6 +1,6 @@
 // @flow
 
-import type {Path, Params, Location, ReduxStore} from './types';
+import type {Path, Params, Location, ReduxStore, Transition} from './types';
 import type {RerouterAction} from './actions';
 import type {State} from './reducer';
 import type {BaseHistory} from './history/base';
@@ -25,15 +25,6 @@ export const applyRouter = (mainReducer: Function) => (
   };
 };
 
-// TODO (kyle): dont need this
-export const initDOMContext = (store: ReduxStore) => {
-  return;
-  window.addEventListener('popstate', () => {
-    console.log('pop state');
-    store.dispatch(handlePop());
-  });
-};
-
 const rerouterActions = new Set([PUSH, REPLACE, POP, HANDLE_POP]);
 const historyActions = new Set([PUSH, REPLACE, POP]);
 const routeActions = new Set([PUSH, REPLACE, HANDLE_POP]);
@@ -41,19 +32,9 @@ const routeActions = new Set([PUSH, REPLACE, HANDLE_POP]);
 export const createMiddleware = (
   routes: Routes,
   history: BaseHistory,
-  transitionHooks?: Array<
-    (
-      {
-        routes: Routes,
-        location: Location,
-        store: ReduxStore,
-      },
-      {path: Path, params: Params},
-    ) => Promise<{path: Path, params: Params}>,
-  > = [],
+  transitionHooks?: Array<Transition> = [],
 ) => (store: ReduxStore) => {
   history.addPopStateListener(() => {
-    console.log('popping');
     store.dispatch(handlePop());
   });
 
