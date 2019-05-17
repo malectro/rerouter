@@ -16,6 +16,7 @@ type Props<E: Object> = {
 
 const mapStateToProps = ({router}) => router;
 
+// TODO (kyle): could catch `ReplaceError` instances in render?
 const Router = <E: Object>({
   routes,
   location,

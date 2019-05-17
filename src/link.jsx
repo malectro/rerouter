@@ -13,7 +13,7 @@ const mapStateToProps = ({router: {location}}) => ({
 });
 
 class Link extends React.Component<{
-  to: LocationType | (Location => LocationType),
+  to: LocationType | (Location => LocationType) | void | null,
   className?: string,
   activeClassName?: string,
   onlyActiveOnIndex?: boolean,
@@ -32,6 +32,11 @@ class Link extends React.Component<{
       dispatch: _,
       ...props
     } = this.props;
+
+    if (!to) {
+      return <a {...props} className={className}>{children}</a>;
+    }
+
     let href = to;
 
     if (typeof href === 'function') {
