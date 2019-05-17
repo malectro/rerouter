@@ -11,6 +11,8 @@ import invariant from 'invariant';
 export async function match<C>(routes: RouteCollection<C>, pathname: string, context: C): Promise<Path> {
   routes = resolveRoutes(routes, context);
 
+  console.log('matching', routes);
+
   for (let i = 0; i < routes.length; i++) {
     const route = routes[i];
 
@@ -37,6 +39,8 @@ export async function match<C>(routes: RouteCollection<C>, pathname: string, con
         if (!route.children && route.loadChildren) {
           route.children = children = useDefault(await route.loadChildren());
         }
+
+        invariant(children, 'Could not load children.');
 
         const trail = await match(children, pathname.slice(matchInfo.length), context);
         if (trail && trail.length > 0) {
@@ -79,14 +83,15 @@ export function getParams(path: Path) {
   );
 }
 
-function resolveRoutes<C>(routes: RouteCollection<C>, context: C): Array<Route<C>> {
+export function resolveRoutes<C>(routes: RouteCollection<C>, context: C): Array<Route<C>> {
   return typeof routes === 'function' ? routes(context) : routes;
 }
 
 export function getRoutePath<C>(path: Path, routes: RouteCollection<C>, context: C): Route<C>[] {
+  console.log('getting route path', path, routes);
   let currentChildren = resolveRoutes(routes, context);
-  // $FlowIssue flow doesn't seem to work with filter
-  return path.map(({routeIndex}) => {
+  return path.map(({routeIndex}, i) => {
+    console.log('pathing', path[i], currentChildren);
     invariant(
       currentChildren,
       'Attempted to get components for an invalid path.',
@@ -102,7 +107,7 @@ export function getRoutePath<C>(path: Path, routes: RouteCollection<C>, context:
 
 export function getComponents<C>(
   path: Path,
-  routes: Route<C>[],
+  routes: RouteCollection<C>,
   context: C,
 ): ComponentType<mixed>[] {
   return getRoutePath(path, routes, context)
