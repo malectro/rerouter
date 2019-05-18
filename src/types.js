@@ -10,6 +10,7 @@ import Routes from './routes';
 
 export type Route<C> = {
   path?: string,
+  require?: (C) => boolean,
   component?: React.ComponentType<*>,
   getComponent?: () => PossibleDefaultExport<React.ComponentType<mixed>>,
   children?: RouteCollection<C>,

@@ -14,11 +14,18 @@ export async function match<C>(routes: RouteCollection<C>, pathname: string, con
   for (let i = 0; i < routes.length; i++) {
     const route = routes[i];
 
+    // TODO (kyle): we allow null routes, but this is probably
+    // unnecessary.
     if (!route) {
       continue;
     }
 
-    const {path, getComponent, loadChildren} = route;
+    const {path, require, getComponent, loadChildren} = route;
+
+    if (require && !require(context)) {
+      continue;
+    }
+
     let {children} = route;
 
     if (children || loadChildren) {

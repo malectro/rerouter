@@ -17,6 +17,7 @@ class Link extends React.Component<{
   className?: string,
   activeClassName?: string,
   onlyActiveOnIndex?: boolean,
+  onClick: (SyntheticMouseEvent<HTMLElement>) => mixed,
   children: React.Node,
   location: Location,
   dispatch: Dispatch,
@@ -58,7 +59,15 @@ class Link extends React.Component<{
     );
   }
 
-  _handleClick(event) {
+  _handleClick(event: SyntheticMouseEvent<HTMLElement>) {
+    if (this.props.onClick) {
+      this.props.onClick(event);
+    }
+
+    if (event.isDefaultPrevented()) {
+      return;
+    }
+
     event.preventDefault();
     this.props.dispatch(push(this.props.to));
   }
