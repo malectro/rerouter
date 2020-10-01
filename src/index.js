@@ -1,5 +1,6 @@
-//import "core-js/stable";
-//import "regenerator-runtime/runtime";
+// TODO (kyle): figure out how to simplify these
+import "core-js/stable";
+import "regenerator-runtime/runtime";
 
 export {
   PUSH,
@@ -11,6 +12,8 @@ export {
   pop,
   handlePop,
 } from './actions';
+export {useRouter, useLocation} from './hooks';
+export {withRouter} from './hoc';
 export {default as Link} from './link.jsx';
 export {default as Provider} from './component';
 export {applyRouter, createMiddleware} from './middleware';

@@ -31,6 +31,7 @@
     "babel-core": "^7.0.0-0",
     "babel-eslint": "^8.2.1",
     "babel-jest": "^22.2.2",
+    "core-js": "^3.6.5",
     "eslint": "^4.16.0",
     "eslint-plugin-flowtype": "^2.42.0",
     "eslint-plugin-import": "^2.8.0",
@@ -40,8 +41,8 @@
     "jest": "^22.2.2",
     "prettier": "^1.10.2",
     "react": "^16.8.6",
-    "react-redux": "^7.0.3",
-    "redux": "^4.0.1"
+    "react-redux": "^7.2.1",
+    "redux": "^4.0.5"
   },
   "peerDependencies": {
     "react": ">=16",

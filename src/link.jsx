@@ -1,67 +1,46 @@
 // @flow
 
-import type {Location, LocationType, Dispatch} from './types';
+import type {Location, LocationType} from './types';
 
 import * as React from 'react';
-import {connect} from 'react-redux';
+import {useDispatch} from 'react-redux';
 
+import {useLocation} from './hooks';
 import {push} from './actions';
 
 
-const mapStateToProps = ({router: {location}}) => ({
-  location,
-});
-
-class Link extends React.Component<{
+export default function Link({
+  to,
+  className,
+  activeClassName,
+  onlyActiveOnIndex,
+  children,
+  ...props
+}: {
   to: LocationType | (Location => LocationType) | void | null,
   className?: string,
   activeClassName?: string,
   onlyActiveOnIndex?: boolean,
   onClick: (SyntheticMouseEvent<HTMLElement>) => mixed,
   children: React.Node,
-  location: Location,
-  dispatch: Dispatch,
-}> {
-  render() {
-    const {
-      to,
-      className,
-      activeClassName,
-      onlyActiveOnIndex,
-      children,
-      location,
-      dispatch: _,
-      ...props
-    } = this.props;
+}) {
+  const dispatch = useDispatch();
+  const location = useLocation();
 
-    if (!to) {
-      return <a {...props} className={className}>{children}</a>;
-    }
+  let href = to;
 
-    let href = to;
-
-    if (typeof href === 'function') {
-      href = href(location);
-    }
-    href = typeof href === 'string' ? href : href.pathname;
-
-    const isActive = onlyActiveOnIndex ? location.pathname.startsWith(href) : href === location.pathname;
-
-    return (
-      <a
-        {...props}
-        className={isActive && activeClassName ? activeClassName : className}
-        onClick={this.handleClick}
-        href={href}
-      >
-        {children}
-      </a>
-    );
+  if (typeof href === 'function') {
+    href = href(location);
   }
+  href = typeof href === 'string' ? href : href.pathname;
 
-  _handleClick(event: SyntheticMouseEvent<HTMLElement>) {
-    if (this.props.onClick) {
-      this.props.onClick(event);
+  const isActive = onlyActiveOnIndex ?
+    href === location.pathname :
+    location.pathname.startsWith(href);
+
+  const handleClick = (event: SyntheticMouseEvent<HTMLElement>) => {
+    if (props.onClick) {
+      props.onClick(event);
     }
 
     if (event.isDefaultPrevented()) {
@@ -69,9 +48,25 @@ class Link extends React.Component<{
     }
 
     event.preventDefault();
-    this.props.dispatch(push(this.props.to));
-  }
-  handleClick = this._handleClick.bind(this);
-}
+    dispatch(push(href));
+  };
 
-export default connect(mapStateToProps)(Link);
+  if (!to) {
+    return (
+      <a {...props} className={className}>
+        {children}
+      </a>
+    );
+  }
+
+  return (
+    <a
+      {...props}
+      className={isActive && activeClassName ? activeClassName : className}
+      onClick={handleClick}
+      href={href}
+    >
+      {children}
+    </a>
+  );
+}
