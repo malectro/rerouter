@@ -10,8 +10,6 @@ import {useLocation} from './hooks';
 export function useRoutes(routes: SyncRoute[]) {
   const location = useLocation();
 
-  console.log('got new location', location.pathname);
-
   const contextValue = React.useMemo(
     () => {
       const path = matchSync(routes, location.pathname);
@@ -25,8 +23,8 @@ export function useRoutes(routes: SyncRoute[]) {
 
   return (
     <RouteContext.Provider value={contextValue}>
-      {contextValue.path.reduceRight((children, {route, params}) => route.element ?
-        route.element({params, children})
+      {contextValue.path.reduceRight((children, {route}) => route.element ?
+        route.element({params: contextValue.params, children})
         : children, null)}
     </RouteContext.Provider>
   );
