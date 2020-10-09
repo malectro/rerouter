@@ -3,10 +3,8 @@
 import type {Location, LocationType} from './types';
 
 import * as React from 'react';
-import {useDispatch} from 'react-redux';
 
-import {useLocation} from './hooks';
-import {push} from './actions';
+import {useHistory} from './hooks';
 
 
 export default function Link({
@@ -24,15 +22,15 @@ export default function Link({
   onClick: (SyntheticMouseEvent<HTMLElement>) => mixed,
   children: React.Node,
 }) {
-  const dispatch = useDispatch();
-  const location = useLocation();
+  const history = useHistory();
+  const {location} = history;
 
   let href = to;
 
   if (typeof href === 'function') {
     href = href(location);
   }
-  href = typeof href === 'string' ? href : href.pathname;
+  href = typeof href === 'string' ? href : href && href.pathname ;
 
   const isActive = onlyActiveOnIndex ?
     href === location.pathname :
@@ -48,7 +46,7 @@ export default function Link({
     }
 
     event.preventDefault();
-    dispatch(push(href));
+    history.push(href);
   };
 
   if (!to) {

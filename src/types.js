@@ -2,6 +2,7 @@
 
 import type {RerouterAction} from './actions';
 import type {State} from './reducer';
+import {BaseHistory} from './history/base';
 
 import * as React from 'react';
 
@@ -32,12 +33,14 @@ export type Params = {
 
 export type RouteResolution = {path: Path, params: Params};
 
-export type Location = {
-  pathname: string,
-  query?: Query,
-  search?: string,
+export type Location = URL & {
+  query: Query,
 };
-export type LocationType = Location | string;
+export type LocationType = {
+  pathname?: string,
+  search?: string,
+  query?: Query,
+} | string;
 
 export type Query = {
   [string]: string,
@@ -69,3 +72,27 @@ export type PossibleDefaultExport<Thing: Object> = Promise<
     }
   | Thing,
 >;
+
+
+// new stuff
+
+export type SyncRoute = {
+  path?: string,
+  element?: ({params: Params, children: React.Node}) => React.Node,
+  children?: SyncRoute[],
+  exact?: boolean,
+};
+
+export type SyncPath = {
+  part: ?string,
+  pathname: string,
+  route: SyncRoute,
+  params: Params,
+}[];
+
+export type RouterContextValue = {
+  history: BaseHistory,
+  routes: SyncRoute[],
+  path: Path,
+  params: Params,
+};

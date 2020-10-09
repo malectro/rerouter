@@ -36,6 +36,6 @@ export default class ServerHistory implements BaseHistory {
   }
 
   addLeaveHook() {}
-  addPopStateListener() {}
+  addListener() {}
 }
 

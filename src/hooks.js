@@ -1,16 +1,13 @@
 // @flow
 
-import {useSelector} from 'react-redux';
+import {useContext} from 'react';
+import {RouterContext} from './context';
 
 
-export function useRouter() {
-  return useSelector(selectRouter);
+export function useHistory() {
+  return useContext(RouterContext).history;
 }
 
 export function useLocation() {
-  return useRouter().location;
-}
-
-function selectRouter(state) {
-  return state.router;
+  return useHistory().location;
 }

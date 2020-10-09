@@ -45,5 +45,5 @@ export default class SimpleHistory implements BaseHistory {
   }
 
   addLeaveHook() {}
-  addPopStateListener() {}
+  addListener() {}
 }

@@ -1,4 +1,4 @@
-import {match, getComponents, pathToRegex} from '../path';
+import {match, matches, getComponents, pathToRegex} from '../path';
 
 
 const routes = [
@@ -89,5 +89,29 @@ describe('pathToRegex', () => {
       regex: /^\/?root\/([^/]+)\/([^/]+)\/page(?:s)?\/.*\/page2/,
       params: ['id', 'id2'],
     });
+  });
+});
+
+describe('matches', () => {
+  test('exact', () => {
+    expect(matches('root/:id', 'root/2')).toEqual(
+      {
+        length: 6,
+        params: {
+          id: '2',
+        },
+      },
+    );
+  });
+
+  test.only('prefix', () => {
+    expect(matches('root/:id', 'root/2/edit')).toEqual(
+      {
+        length: 6,
+        params: {
+          id: '2',
+        },
+      },
+    );
   });
 });

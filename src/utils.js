@@ -7,6 +7,7 @@ import {parse, stringify} from 'querystringify';
 
 export function createLocation(
   location: LocationType | Location = {
+    href: '',
     pathname: '',
     search: '',
     query: {},
@@ -18,9 +19,13 @@ export function createLocation(
     };
   }
 
+  const searchParams = location.searchParams || new URLSearchParams(location.search);
+
   return {
+    href: location.href,
     pathname: location.pathname,
     search: location.search,
+    searchParams,
     query: location.query || parse(location.search || ''),
   };
 }

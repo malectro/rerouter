@@ -3,7 +3,7 @@
 import * as React from 'react';
 
 import type {Location} from './types';
-import {useRouter} from './hooks';
+import {useHistory} from './hooks';
 
 
 export function withRouter<C>(
@@ -11,7 +11,7 @@ export function withRouter<C>(
 ): React.ComponentType<$Diff<C, {location: Location}>> {
   // $FlowFixMe
   return Object.assign(props => {
-    const router = useRouter();
+    const router = useHistory();
     return <WrappedComponent {...props} {...router} />;
   }, WrappedComponent);
 }

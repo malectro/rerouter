@@ -9,6 +9,6 @@ export interface BaseHistory {
   pop(): void;
   get location(): Location;
   leave(): Promise<void>;
-  addPopStateListener(PopStateListener): () => void;
+  addListener(PopStateListener): () => void;
   addLeaveHook(LeaveHook): () => void;
 }
