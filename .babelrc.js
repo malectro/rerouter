@@ -5,8 +5,11 @@ const baseConfig = {
       {
         targets: {
           browsers: ['last 2 versions'],
+          esmodules: process.env.BABEL_ENV === 'es',
         },
         modules: process.env.BABEL_ENV === 'es' ? false : 'commonjs',
+        corejs: 3,
+        useBuiltIns: 'entry',
       },
     ],
     '@babel/preset-react',

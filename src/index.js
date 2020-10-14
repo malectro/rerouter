@@ -1,8 +1,8 @@
 // @flow
 
 // TODO (kyle): figure out how to simplify these
-import "core-js/stable";
-import "regenerator-runtime/runtime";
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
 
 /*
 export {
