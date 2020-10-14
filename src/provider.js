@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import {BaseHistory} from './history/base';
-import {RouterContext} from './context';
+import {RouterContext} from './history-context';
 
 
 export function RouterProvider({

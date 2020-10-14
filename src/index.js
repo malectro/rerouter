@@ -38,6 +38,6 @@ export type {Transition} from './types';
 
 export {default as Link} from './link.jsx';
 export {default as BrowserHistory} from './history/browser';
-export {useHistory, useLocation} from './hooks';
+export {useHistory, useLocation, useParams} from './hooks';
 export {useRoutes} from './useRoutes';
 export {RouterProvider} from './provider';

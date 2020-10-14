@@ -104,7 +104,8 @@ export function matchSync(routes: SyncRoute[], pathname: string): SyncPath {
         if (trail && trail.length > 0) {
           trail.unshift({
             part: path,
-            pathname: matchInfo.length > 0 ? pathname : '',
+            //pathname: matchInfo.length > 0 ? pathname : '',
+            pathname: pathname.slice(0, matchInfo.length),
             route,
             params: matchInfo.params,
           });
@@ -118,7 +119,7 @@ export function matchSync(routes: SyncRoute[], pathname: string): SyncPath {
         return [
           {
             part: path,
-            pathname,
+            pathname: pathname.slice(0, matchInfo.length),
             route,
             params: matchInfo.params,
           },
@@ -225,6 +226,7 @@ function pathToParams(path: string) {
 export function resolveSyncPath(path: SyncPath[]): {pathname: string, params: Params} {
   return {
     pathname: ''.concat(...path.map(step => step.pathname)),
+    //pathname: path[0] ? path[0].pathname : '',
     params: Object.assign({}, ...path.map(step => step.params)),
   };
 }
