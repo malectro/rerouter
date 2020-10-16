@@ -17,6 +17,7 @@ export function RouterProvider({
   React.useEffect(
     () =>
       history.addListener(() => {
+        console.log('location change event');
         setState({});
       }),
     [history],

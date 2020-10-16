@@ -5,11 +5,12 @@ import type {SyncRoute} from './types';
 import * as React from 'react';
 import {matchSync, resolveSyncPath} from './path';
 import {RouteContext} from './route-context';
-import {useLocation} from './hooks';
+import {useHistory} from './hooks';
 
 
 export function useRoutes(routes: SyncRoute[]) {
-  const location = useLocation();
+  const history = useHistory();
+  const {location} = history;
   const parent = React.useContext(RouteContext);
 
   const pathname = location.pathname.slice(parent.pathname.length);
@@ -27,11 +28,32 @@ export function useRoutes(routes: SyncRoute[]) {
     [routes, pathname],
   );
 
+  console.log('contextValue', contextValue);
+
+  console.log(
+    'content',
+    contextValue.path.reduceRight(
+      (children, {route}) =>
+        route.element ?
+          typeof route.element === 'function' ?
+            route.element({params: contextValue.params, children})
+            : route.element
+          : children,
+      null,
+    ),
+  );
+
   return (
     <RouteContext.Provider value={contextValue}>
-      {contextValue.path.reduceRight((children, {route}) => route.element ?
-        (typeof route.element === 'function' ? route.element({params: contextValue.params, children}) : route.element)
-        : children, null)}
+      {contextValue.path.reduceRight(
+        (children, {route}) =>
+          route.element ?
+            typeof route.element === 'function' ?
+              route.element({params: contextValue.params, location, history, children})
+              : route.element
+            : children,
+        null,
+      )}
     </RouteContext.Provider>
   );
 }

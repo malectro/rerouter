@@ -87,7 +87,7 @@ export async function match<C>(
 }
 
 export function matchSync(routes: SyncRoute[], pathname: string): SyncPath {
-  for (const route of routes) {
+  for (const route of routes.filter(Boolean)) {
     const {path, children} = route;
 
     if (children) {
@@ -97,6 +97,7 @@ export function matchSync(routes: SyncRoute[], pathname: string): SyncPath {
           length: 0,
           params: {},
         };
+      console.log('matchInfo', matchInfo, path, pathname);
 
       if (matchInfo) {
         const trail = matchSync(children, pathname.slice(matchInfo.length));
@@ -115,6 +116,7 @@ export function matchSync(routes: SyncRoute[], pathname: string): SyncPath {
       }
     } else if (path != null) {
       const matchInfo = matches(path, pathname);
+      console.log('matchInfo', matchInfo, path, pathname);
       if (matchInfo && (!route.exact || matchInfo.length === pathname.length)) {
         return [
           {

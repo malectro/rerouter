@@ -1,7 +1,7 @@
 // @flow
 
 import type {
-  Location as LocationObject,
+  RouterLocation,
   LocationType,
   LeaveHook,
   PopStateListener,
@@ -35,7 +35,10 @@ export default class BrowserHistory implements BaseHistory {
 
   _abortingPopState = false;
 
-  constructor(browserHistory: History = window.history, location: Location = window.location) {
+  constructor(
+    browserHistory: History = window.history,
+    location: Location = window.location,
+  ) {
     this._browserHistory = browserHistory;
     this._browserLocation = location;
     this._currentStackIndex =
@@ -51,7 +54,9 @@ export default class BrowserHistory implements BaseHistory {
       this.handlePopState(event);
     });
 
-    window.addEventListener('beforeunload', event => this.handleBeforeUnload(event));
+    window.addEventListener('beforeunload', event =>
+      this.handleBeforeUnload(event),
+    );
   }
 
   generateState<S>(subState: S): HistoryState<S> {
@@ -61,23 +66,47 @@ export default class BrowserHistory implements BaseHistory {
     };
   }
 
-  push(location: LocationType, subState: mixed = null) {
+  async push(location: LocationType, subState: mixed = null) {
+    try {
+      await this.leave();
+    } catch (error) {
+      if (error instanceof AbortError) {
+        return;
+      } else {
+        throw error;
+      }
+    }
+
     this._currentStackIndex++;
     const state = this.generateState(subState);
 
+    location = this.resolveLocation(location);
     this._stack = [
       ...this._stack.slice(0, this._currentStackIndex),
       {location, state},
     ];
     this._browserHistory.pushState(state, '', stringifyLocation(location));
+
     this.notify();
   }
 
-  replace(location: LocationType, subState: mixed = null) {
+  async replace(location: LocationType, subState: mixed = null) {
+    try {
+      await this.leave();
+    } catch (error) {
+      if (error instanceof AbortError) {
+        return;
+      } else {
+        throw error;
+      }
+    }
+
     const state = this.generateState(subState);
 
+    location = this.resolveLocation(location);
     this._stack[this._currentStackIndex] = {location, state};
     this._browserHistory.replaceState(state, '', stringifyLocation(location));
+
     this.notify();
   }
 
@@ -91,6 +120,20 @@ export default class BrowserHistory implements BaseHistory {
     return url;
   }
 
+  resolveLocation(
+    locationArg: LocationType | (RouterLocation => LocationType),
+  ): LocationType {
+    const location = createLocation(
+      typeof locationArg === 'function' ?
+        locationArg(this.location)
+        : locationArg,
+    );
+    if (!location.pathname.startsWith('/')) {
+      location.pathname = this.location.pathname + '/' + location.pathname;
+    }
+    return location;
+  }
+
   handleBeforeUnload(event: Event & {returnValue?: mixed}) {
     const response = this.leaveSync();
     if (response) {
@@ -98,7 +141,7 @@ export default class BrowserHistory implements BaseHistory {
     }
   }
 
-  async handlePopState(event: Event) {
+  async handlePopState() {
     // if this event was triggered by an aborted transition, we ignore it.
     if (this._abortingPopState) {
       this._abortingPopState = false;

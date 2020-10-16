@@ -33,7 +33,7 @@ export type Params = {
 
 export type RouteResolution = {path: Path, params: Params};
 
-export type Location = URL & {
+export type RouterLocation = URL & {
   query: Query,
 };
 export type LocationType = {
