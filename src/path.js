@@ -1,10 +1,14 @@
 // @flow
 
-import type {SyncPath, SyncRoute, Params} from './types';
+import type {SyncPath, SyncRoute, SyncRoutes, Params} from './types';
 
 
-export function matchSync(routes: SyncRoute[], pathname: string, parentPathname: string = ''): SyncPath {
-  for (const route of routes.filter(Boolean)) {
+export function matchSync(routes: SyncRoutes, pathname: string, parentPathname: string = ''): SyncPath {
+  for (const route of routes) {
+    if (!route) {
+      continue;
+    }
+
     const {path, children} = route;
 
     if (children && children.length > 0) {

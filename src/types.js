@@ -41,9 +41,13 @@ export type GetElement = ElementContext => React.Node;
 export type SyncRoute = {
   path?: string,
   element?: React.Node | GetElement,
-  children?: SyncRoute[],
+  children?: SyncRoutes,
   exact?: boolean,
 };
+
+export type SyncRoutes = Array<
+  SyncRoute | null | false | void
+>;
 
 export type SyncPath = {
   part: ?string,

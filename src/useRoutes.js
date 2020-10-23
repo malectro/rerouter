@@ -1,6 +1,6 @@
 // @flow
 
-import type {SyncRoute, RerouterLocation} from './types';
+import type {SyncRoutes, RerouterLocation} from './types';
 
 import * as React from 'react';
 import {matchSync, resolveSyncPath} from './path';
@@ -8,7 +8,7 @@ import {RouteContext, type RouteContextValue} from './route-context';
 import {useHistory} from './hooks';
 
 
-export function useRoutes(routes: SyncRoute[]): [
+export function useRoutes(routes: SyncRoutes): [
   React.Node,
   RouteContextValue,
   RerouterLocation,

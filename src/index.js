@@ -37,7 +37,7 @@ export type {Transition} from './types';
 */
 
 export type {RerouterLocation, Params, Query, GetElement, ElementContext} from './types';
-export {default as Link} from './link.jsx';
+export {default as Link} from './link';
 export {BaseHistory as RouterHistory} from './history/base';
 export {default as BrowserHistory} from './history/browser';
 export {useHistory, useLocation, useParams} from './hooks';
