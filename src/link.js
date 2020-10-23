@@ -21,6 +21,7 @@ export default function Link({
   onlyActiveOnIndex?: boolean,
   onClick?: (SyntheticMouseEvent<HTMLElement>) => mixed,
   children?: React.Node,
+  ...
 }): React.Node {
   const history = useHistory();
   const {location} = history;
