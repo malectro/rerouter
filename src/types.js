@@ -1,4 +1,4 @@
-// @flow
+// @flow strict
 
 import type {BaseHistory} from './history/base';
 import * as React from 'react';
@@ -14,6 +14,7 @@ export type RerouterLocation = {
   search: string,
   searchParams: URLSearchParams,
   query: Query,
+  hash: string,
 };
 export type LocationType = $Shape<RerouterLocation> | string;
 export type LocationArg = LocationType | (RerouterLocation => LocationType);

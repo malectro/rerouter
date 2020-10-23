@@ -1,4 +1,4 @@
-// @flow
+// @flow strict
 
 import type {LocationType, RerouterLocation} from './types';
 
@@ -29,6 +29,7 @@ export function createLocation(
     search: search ? '?' + search : search,
     searchParams,
     query,
+    hash: location.hash,
   };
 }
 
@@ -38,6 +39,7 @@ const defaultLocation = {
   search: '',
   searchParams: new URLSearchParams(''),
   query: {},
+  hash: '',
 };
 
 export function stringifyLocation(location: RerouterLocation): string {

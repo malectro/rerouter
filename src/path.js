@@ -1,6 +1,6 @@
-// @flow
+// @flow strict
 
-import type {SyncPath, SyncRoute, SyncRoutes, Params} from './types';
+import type {SyncPath, SyncRoutes, Params} from './types';
 
 
 export function matchSync(routes: SyncRoutes, pathname: string, parentPathname: string = ''): SyncPath {

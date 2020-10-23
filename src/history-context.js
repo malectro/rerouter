@@ -1,4 +1,4 @@
-// @flow
+// @flow strict
 
 import {createContext, type Context} from 'react';
 import {BaseHistory} from './history/base';

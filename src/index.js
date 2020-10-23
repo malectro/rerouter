@@ -1,4 +1,4 @@
-// @flow
+// @flow strict
 
 // TODO (kyle): figure out how to simplify these
 import 'core-js/stable';

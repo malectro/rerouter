@@ -1,4 +1,4 @@
-// @flow
+// @flow strict
 
 import {createContext, type Context} from 'react';
 import type {SyncPath, Params} from './types';

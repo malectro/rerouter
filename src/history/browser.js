@@ -1,4 +1,4 @@
-// @flow
+// @flow strict
 
 import type {
   RerouterLocation,
@@ -67,8 +67,8 @@ export default class BrowserHistory implements BaseHistory {
     };
   }
 
-  async push(location: LocationArg, subState: mixed = null): Promise<void> {
-    location = this.resolveLocation(location);
+  async push(locationArg: LocationArg, subState: mixed = null): Promise<void> {
+    const location = this.resolveLocation(locationArg);
 
     try {
       await this.leave(location);
@@ -93,7 +93,7 @@ export default class BrowserHistory implements BaseHistory {
   }
 
   async replace(
-    location: LocationArg,
+    locationArg: LocationArg,
     {
       state = null,
       silent,
@@ -102,7 +102,7 @@ export default class BrowserHistory implements BaseHistory {
       silent?: boolean,
     } = {},
   ): Promise<void> {
-    location = this.resolveLocation(location);
+    const location = this.resolveLocation(locationArg);
 
     if (!silent) {
       try {
@@ -137,6 +137,7 @@ export default class BrowserHistory implements BaseHistory {
   }
 
   // TODO (kyle): memoize this
+  // $FlowFixMe[unsafe-getters-setters]
   get location(): RerouterLocation {
     return createLocation(this._browserLocation);
   }
@@ -155,10 +156,9 @@ export default class BrowserHistory implements BaseHistory {
     return location;
   }
 
-  handleBeforeUnload(event: Event & {returnValue?: mixed}) {
+  handleBeforeUnload(event: Event & {returnValue?: mixed} = window.event) {
     const response = this.leaveSync();
     if (response) {
-      event = event || window.event;
       event.preventDefault();
       event.returnValue = response;
     }
@@ -184,10 +184,8 @@ export default class BrowserHistory implements BaseHistory {
 
       this.notify();
     } catch (error) {
-      console.log('got error', error, nextIndex, this._currentStackIndex);
       if (error instanceof AbortError) {
         if (Number.isInteger(nextIndex)) {
-          console.log('aborting');
           this._abortingPopState = true;
           this._browserHistory.go(this._currentStackIndex - nextIndex);
         }

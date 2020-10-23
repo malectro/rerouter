@@ -1,4 +1,4 @@
-// @flow
+// @flow strict
 
 import type {SyncRoutes, RerouterLocation} from './types';
 
