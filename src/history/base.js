@@ -14,7 +14,7 @@ export interface BaseHistory {
     location: LocationType,
     options?: {state?: mixed, silent?: boolean},
   ): Promise<void>;
-  pop(): void;
+  back(): void;
   get location(): RerouterLocation;
   leave(): Promise<void>;
   addListener(PopStateListener): () => void;

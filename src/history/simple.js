@@ -27,7 +27,7 @@ export default class SimpleHistory implements BaseHistory {
     };
   }
 
-  pop() {
+  back() {
     if (this._currentStackIndex < 1) {
       console.warn('Attempted to pop() history on a stack of length 1.');
       return;

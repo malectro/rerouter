@@ -27,7 +27,7 @@ export default class ServerHistory implements BaseHistory {
     throw new AbortError('Aborting due to server redirect.');
   }
 
-  pop() {
+  back() {
     // noop
   }
 
