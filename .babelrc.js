@@ -9,7 +9,7 @@ const baseConfig = {
         },
         modules: process.env.BABEL_ENV === 'es' ? false : 'commonjs',
         corejs: 3,
-        useBuiltIns: 'entry',
+        useBuiltIns: 'usage',
       },
     ],
     '@babel/preset-react',

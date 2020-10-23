@@ -8,7 +8,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "build": "npm run build:es && npm run build:cjs",
+    "build": "gulp build",
     "build:es": "BABEL_ENV=es babel src -d es",
     "build:cjs": "BABEL_ENV=cjs babel src -d cjs",
     "build:dev": "BABEL_ENV=cjs babel --watch src -d cjs",
@@ -37,6 +37,9 @@
     "eslint-plugin-react": "^7.6.1",
     "flow-bin": "^0.136.0",
     "flow-typed": "^3.2.1",
+    "gulp": "^4.0.2",
+    "gulp-babel": "^8.0.0",
+    "gulp-rename": "^2.0.0",
     "jest": "^22.2.2",
     "prettier": "^1.10.2",
     "react": "^16.8.6"
