@@ -35,6 +35,9 @@ export default class SimpleHistory implements BaseHistory {
 
     this._currentStackIndex--;
   }
+  goBack() {
+    this.back();
+  }
 
   get location(): RerouterLocation {
     return createLocation(this._stack[this._currentStackIndex].location);

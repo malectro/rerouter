@@ -15,12 +15,12 @@ export default function Link({
   children,
   ...props
 }: {
-  to: LocationType | (RerouterLocation => LocationType) | void | null,
+  to?: LocationType | (RerouterLocation => LocationType) | void | null,
   className?: string,
   activeClassName?: string,
   onlyActiveOnIndex?: boolean,
-  onClick: (SyntheticMouseEvent<HTMLElement>) => mixed,
-  children: React.Node,
+  onClick?: (SyntheticMouseEvent<HTMLElement>) => mixed,
+  children?: React.Node,
 }): React.Node {
   const history = useHistory();
   const {location} = history;

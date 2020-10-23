@@ -127,10 +127,13 @@ export default class BrowserHistory implements BaseHistory {
   }
 
   pop() {
-    this._browserHistory.back();
+    this.back();
   }
   back() {
-    this.pop();
+    this._browserHistory.back();
+  }
+  goBack() {
+    this.back();
   }
 
   // TODO (kyle): memoize this

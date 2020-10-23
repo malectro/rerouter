@@ -30,6 +30,9 @@ export default class ServerHistory implements BaseHistory {
   back() {
     // noop
   }
+  goBack() {
+    // noop
+  }
 
   async leave() {
     // noop
