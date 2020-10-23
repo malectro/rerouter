@@ -1,6 +1,6 @@
 // @flow
 
-import type {LocationType, RerouterLocation} from '../types';
+import type {LocationType, LocationArg, RerouterLocation} from '../types';
 import type {BaseHistory} from './base';
 
 import {createLocation} from '../utils';
@@ -15,14 +15,14 @@ export default class SimpleHistory implements BaseHistory {
     this._currentStackIndex = 0;
   }
 
-  async push(location: LocationType, state: mixed): Promise<void> {
+  async push(location: LocationArg, state: mixed): Promise<void> {
     this._currentStackIndex++;
-    this._stack = [...this._stack.slice(0, this._currentStackIndex), {location, state}];
+    this._stack = [...this._stack.slice(0, this._currentStackIndex), {location: this.resolveLocation(location), state}];
   }
 
-  async replace(location: LocationType, state: mixed): Promise<void> {
+  async replace(location: LocationArg, state: mixed): Promise<void> {
     this._stack[this._currentStackIndex] = {
-      location,
+      location: this.resolveLocation(location),
       state,
     };
   }
@@ -53,5 +53,19 @@ export default class SimpleHistory implements BaseHistory {
     return () => {
       // noop
     };
+  }
+
+  resolveLocation(
+    locationArg: LocationType | (RerouterLocation => LocationType),
+  ): RerouterLocation {
+    const location = createLocation(
+      typeof locationArg === 'function' ?
+        locationArg(this.location)
+        : locationArg,
+    );
+    if (!location.pathname.startsWith('/')) {
+      location.pathname = this.location.pathname + '/' + location.pathname;
+    }
+    return location;
   }
 }

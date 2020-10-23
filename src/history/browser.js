@@ -2,6 +2,7 @@
 
 import type {
   RerouterLocation,
+  LocationArg,
   LocationType,
   LeaveHook,
   PopStateListener,
@@ -66,7 +67,7 @@ export default class BrowserHistory implements BaseHistory {
     };
   }
 
-  async push(location: LocationType, subState: mixed = null): Promise<void> {
+  async push(location: LocationArg, subState: mixed = null): Promise<void> {
     location = this.resolveLocation(location);
 
     try {
@@ -92,7 +93,7 @@ export default class BrowserHistory implements BaseHistory {
   }
 
   async replace(
-    location: LocationType,
+    location: LocationArg,
     {
       state = null,
       silent,

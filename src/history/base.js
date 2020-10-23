@@ -1,7 +1,7 @@
 // @flow
 
 import type {
-  LocationType,
+  LocationArg,
   RerouterLocation,
   LeaveHook,
   PopStateListener,
@@ -9,9 +9,9 @@ import type {
 
 
 export interface BaseHistory {
-  push(location: LocationType, state?: Object): Promise<void>;
+  push(location: LocationArg, state?: Object): Promise<void>;
   replace(
-    location: LocationType,
+    location: LocationArg,
     options?: {state?: mixed, silent?: boolean},
   ): Promise<void>;
   back(): void;

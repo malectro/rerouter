@@ -16,6 +16,7 @@ export type RerouterLocation = {
   query: Query,
 };
 export type LocationType = $Shape<RerouterLocation> | string;
+export type LocationArg = LocationType | (RerouterLocation => LocationType);
 
 export type Query = {
   [string]: string,
