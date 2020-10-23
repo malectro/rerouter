@@ -27,16 +27,20 @@ export type LeaveHook = (
 
 export type PopStateListener = () => mixed;
 
+export type ElementContext = {
+  params: Params,
+  pathPart: string,
+  pathname: string,
+  location: RerouterLocation,
+  history: BaseHistory,
+  children: React.Node,
+};
+
+export type GetElement = ElementContext => React.Node;
+
 export type SyncRoute = {
   path?: string,
-  element?: ({
-    params: Params,
-    pathPart: string,
-    pathname: string,
-    location: RerouterLocation,
-    history: BaseHistory,
-    children: React.Node,
-  }) => React.Node,
+  element?: React.Node | GetElement,
   children?: SyncRoute[],
   exact?: boolean,
 };
