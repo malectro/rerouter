@@ -1,6 +1,6 @@
 // @flow
 
-import type {LocationType, Location} from '../types';
+import type {LocationType, RerouterLocation} from '../types';
 import type {BaseHistory} from './base';
 
 import {createLocation} from '../utils';
@@ -15,12 +15,12 @@ export default class SimpleHistory implements BaseHistory {
     this._currentStackIndex = 0;
   }
 
-  push(location: LocationType, state: mixed) {
+  async push(location: LocationType, state: mixed): Promise<void> {
     this._currentStackIndex++;
     this._stack = [...this._stack.slice(0, this._currentStackIndex), {location, state}];
   }
 
-  replace(location: LocationType, state: mixed) {
+  async replace(location: LocationType, state: mixed): Promise<void> {
     this._stack[this._currentStackIndex] = {
       location,
       state,
@@ -36,7 +36,7 @@ export default class SimpleHistory implements BaseHistory {
     this._currentStackIndex--;
   }
 
-  get location(): Location {
+  get location(): RerouterLocation {
     return createLocation(this._stack[this._currentStackIndex].location);
   }
 
@@ -44,6 +44,14 @@ export default class SimpleHistory implements BaseHistory {
     // TODO (kyle): SimpleHistory should maybe do leavehooks
   }
 
-  addLeaveHook() {}
-  addListener() {}
+  addLeaveHook(): () => void {
+    return () => {
+      // noop
+    };
+  }
+  addListener(): () => void {
+    return () => {
+      // noop
+    };
+  }
 }

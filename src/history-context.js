@@ -4,4 +4,5 @@ import {createContext, type Context} from 'react';
 import {BaseHistory} from './history/base';
 
 
-export const RouterContext: Context<BaseHistory> = createContext();
+// $FlowFixMe[incompatible-type] no point in declaring a history object here
+export const HistoryContext: Context<{history: BaseHistory}> = createContext();

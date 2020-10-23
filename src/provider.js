@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import {BaseHistory} from './history/base';
-import {RouterContext} from './history-context';
+import {HistoryContext} from './history-context';
 
 
 export function RouterProvider({
@@ -10,8 +10,8 @@ export function RouterProvider({
   children,
 }: {
   history: BaseHistory,
-  children: React.ReactNode,
-}) {
+  children: React.Node,
+}): React.Node {
   const [_, setState] = React.useState();
 
   React.useEffect(
@@ -28,8 +28,8 @@ export function RouterProvider({
   ]);
 
   return (
-    <RouterContext.Provider value={contextValue}>
+    <HistoryContext.Provider value={contextValue}>
       {children}
-    </RouterContext.Provider>
+    </HistoryContext.Provider>
   );
 }

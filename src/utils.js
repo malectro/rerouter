@@ -1,45 +1,45 @@
 // @flow
 
-import type {LocationType} from './types';
-
-import {parse, stringify} from 'querystringify';
+import type {LocationType, RerouterLocation} from './types';
 
 
 export function createLocation(
-  location: LocationType | Location = {
-    href: '',
-    pathname: '',
-    search: '',
-    query: {},
-  },
-) {
+  location: LocationType | Location = defaultLocation,
+): RerouterLocation {
   if (typeof location === 'string') {
+    // TODO (kyle): parse this as a pathname with a search string
     return {
+      ...defaultLocation,
       pathname: location,
     };
   }
 
-  const searchParams = location.searchParams || new URLSearchParams(location.search);
+  let searchParams;
+  if (location instanceof Location) {
+    searchParams = new URLSearchParams(location.search);
+  } else {
+    searchParams = location.searchParams || (location.query && new URLSearchParams(location.query)) || new URLSearchParams(location.search);
+  }
+  const query = Object.fromEntries(searchParams.entries());
+  const search = searchParams.toString();
 
   return {
     href: location.href,
     pathname: location.pathname,
-    search: location.search,
+    search: search ? '?' + search : search,
     searchParams,
-    query: location.query || parse(location.search || ''),
+    query,
   };
 }
 
-export function stringifyLocation(location: LocationType | Location) {
-  if (typeof location !== 'string') {
-    const {pathname = ''} = location;
-    let {search} = location;
+const defaultLocation = {
+  href: '',
+  pathname: '',
+  search: '',
+  searchParams: new URLSearchParams(''),
+  query: {},
+};
 
-    if (location.query) {
-      search = stringify(location.query);
-    }
-
-    location = pathname + (search ? `?${search}` : '');
-  }
-  return location;
+export function stringifyLocation(location: RerouterLocation): string {
+  return location.pathname + location.search;
 }

@@ -5,9 +5,21 @@
 [libs]
 
 [lints]
+deprecated-type=warn
+sketchy-number=error
+unclear-type=warn
+unnecessary-invariant=warn
+unnecessary-optional-chain=warn
 
 [options]
-suppress_comment= \\(.\\|\n\\)*\\$FlowFixMe
-suppress_comment= \\(.\\|\n\\)*\\$FlowIssue
+exact_by_default=true
 
 [strict]
+nonstrict-import
+unclear-type
+unsafe-getters-setters
+untyped-import
+untyped-type-import
+deprecated-type
+unnecessary-invariant
+unnecessary-optional-chain

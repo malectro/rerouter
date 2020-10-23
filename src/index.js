@@ -36,7 +36,7 @@ export type {State} from 'reducer';
 export type {Transition} from './types';
 */
 
-export type {RouterLocation, Params, Query} from './types';
+export type {RerouterLocation, Params, Query} from './types';
 export {default as Link} from './link.jsx';
 export {BaseHistory as RouterHistory} from './history/base';
 export {default as BrowserHistory} from './history/browser';

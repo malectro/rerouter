@@ -1,7 +1,7 @@
 // @flow
 
 import type {
-  RouterLocation,
+  RerouterLocation,
   LocationType,
   LeaveHook,
   PopStateListener,
@@ -25,7 +25,7 @@ type HistoryState<S> = {
 export default class BrowserHistory implements BaseHistory {
   // TODO (kyle): not sure it is necessary to keep a secondary stack
   _stack: {location: LocationType, state: HistoryState<mixed>}[] = [];
-  _currentStackIndex = 0;
+  _currentStackIndex: number = 0;
 
   _leaveHooks: Set<LeaveHook> = new Set();
   _popStateListeners: Set<PopStateListener> = new Set();
@@ -33,7 +33,7 @@ export default class BrowserHistory implements BaseHistory {
   _browserHistory: History;
   _browserLocation: Location;
 
-  _abortingPopState = false;
+  _abortingPopState: boolean = false;
 
   constructor(
     browserHistory: History = window.history,
@@ -50,8 +50,8 @@ export default class BrowserHistory implements BaseHistory {
 
     window.rerouterHistory = this;
 
-    window.addEventListener('popstate', event => {
-      this.handlePopState(event);
+    window.addEventListener('popstate', _event => {
+      this.handlePopState();
     });
 
     window.addEventListener('beforeunload', event =>
@@ -66,9 +66,11 @@ export default class BrowserHistory implements BaseHistory {
     };
   }
 
-  async push(location: LocationType, subState: mixed = null) {
+  async push(location: LocationType, subState: mixed = null): Promise<void> {
+    location = this.resolveLocation(location);
+
     try {
-      await this.leave();
+      await this.leave(location);
     } catch (error) {
       if (error instanceof AbortError) {
         return;
@@ -80,7 +82,6 @@ export default class BrowserHistory implements BaseHistory {
     this._currentStackIndex++;
     const state = this.generateState(subState);
 
-    location = this.resolveLocation(location);
     this._stack = [
       ...this._stack.slice(0, this._currentStackIndex),
       {location, state},
@@ -90,39 +91,55 @@ export default class BrowserHistory implements BaseHistory {
     this.notify();
   }
 
-  async replace(location: LocationType, subState: mixed = null) {
-    try {
-      await this.leave();
-    } catch (error) {
-      if (error instanceof AbortError) {
-        return;
-      } else {
-        throw error;
+  async replace(
+    location: LocationType,
+    {
+      state = null,
+      silent,
+    }: {
+      state?: mixed,
+      silent?: boolean,
+    } = {},
+  ): Promise<void> {
+    location = this.resolveLocation(location);
+
+    if (!silent) {
+      try {
+        await this.leave(location);
+      } catch (error) {
+        if (error instanceof AbortError) {
+          return;
+        } else {
+          throw error;
+        }
       }
     }
 
-    const state = this.generateState(subState);
+    const superState = this.generateState(state);
 
-    location = this.resolveLocation(location);
-    this._stack[this._currentStackIndex] = {location, state};
+    this._stack[this._currentStackIndex] = {location, state: superState};
     this._browserHistory.replaceState(state, '', stringifyLocation(location));
 
-    this.notify();
+    if (!silent) {
+      this.notify();
+    }
   }
 
   pop() {
     this._browserHistory.back();
   }
+  back() {
+    this.pop();
+  }
 
-  get location(): URL {
-    const url = new URL(this._browserLocation);
-    url.query = Object.fromEntries(url.searchParams.entries());
-    return url;
+  // TODO (kyle): memoize this
+  get location(): RerouterLocation {
+    return createLocation(this._browserLocation);
   }
 
   resolveLocation(
-    locationArg: LocationType | (RouterLocation => LocationType),
-  ): LocationType {
+    locationArg: LocationType | (RerouterLocation => LocationType),
+  ): RerouterLocation {
     const location = createLocation(
       typeof locationArg === 'function' ?
         locationArg(this.location)
@@ -137,7 +154,9 @@ export default class BrowserHistory implements BaseHistory {
   handleBeforeUnload(event: Event & {returnValue?: mixed}) {
     const response = this.leaveSync();
     if (response) {
-      (event || window.event).returnValue = response;
+      event = event || window.event;
+      event.preventDefault();
+      event.returnValue = response;
     }
   }
 
@@ -152,7 +171,7 @@ export default class BrowserHistory implements BaseHistory {
 
     // if the nextIndex matches the currentIndex it means this
     // pop event was due to an Abort from a previous pop.
-    if (nextIndex === this._currentIndex) {
+    if (nextIndex === this._currentStackIndex) {
       return;
     }
 
@@ -161,8 +180,10 @@ export default class BrowserHistory implements BaseHistory {
 
       this.notify();
     } catch (error) {
+      console.log('got error', error, nextIndex, this._currentStackIndex);
       if (error instanceof AbortError) {
         if (Number.isInteger(nextIndex)) {
+          console.log('aborting');
           this._abortingPopState = true;
           this._browserHistory.go(this._currentStackIndex - nextIndex);
         }
@@ -170,7 +191,7 @@ export default class BrowserHistory implements BaseHistory {
     }
   }
 
-  addLeaveHook(leaveHook: LeaveHook) {
+  addLeaveHook(leaveHook: LeaveHook): () => void {
     this._leaveHooks.add(leaveHook);
     return () => {
       this.removeLeaveHook(leaveHook);
@@ -181,10 +202,9 @@ export default class BrowserHistory implements BaseHistory {
     this._leaveHooks.delete(leaveHook);
   }
 
-  leaveSync() {
-    const nextLocation = this.location;
+  leaveSync(): string | void {
     for (const hook of this._leaveHooks) {
-      const response = hook(nextLocation);
+      const response = hook();
       if (response) {
         if (typeof response === 'string') {
           return response;
@@ -193,8 +213,8 @@ export default class BrowserHistory implements BaseHistory {
     }
   }
 
-  async leave() {
-    const nextLocation = this.location;
+  async leave(location?: RerouterLocation) {
+    const nextLocation = location || this.location;
     for (const hook of this._leaveHooks) {
       const response = hook(nextLocation);
       if (response) {
@@ -210,7 +230,7 @@ export default class BrowserHistory implements BaseHistory {
     }
   }
 
-  addListener(listener: PopStateListener) {
+  addListener(listener: PopStateListener): () => void {
     this._popStateListeners.add(listener);
     return () => {
       this._popStateListeners.delete(listener);

@@ -1,6 +1,6 @@
 // @flow
 
-import type {LocationType, Location} from '../types';
+import type {LocationType, RerouterLocation} from '../types';
 import type {BaseHistory} from './base';
 
 import {AbortError} from '../errors';
@@ -11,18 +11,18 @@ type HandleRedirect = (LocationType) => mixed;
 
 export default class ServerHistory implements BaseHistory {
   handleRedirect: HandleRedirect;
-  location: Location;
+  location: RerouterLocation;
 
   constructor(location: LocationType, onRedirect: HandleRedirect) {
     this.location = createLocation(location);
     this.handleRedirect = onRedirect;
   }
 
-  push(location: LocationType, state: mixed) {
+  async push(_location: LocationType) {
     // noop
   }
 
-  replace(location: LocationType, state: mixed) {
+  async replace(location: LocationType) {
     this.handleRedirect(location);
     throw new AbortError('Aborting due to server redirect.');
   }
@@ -35,7 +35,15 @@ export default class ServerHistory implements BaseHistory {
     // noop
   }
 
-  addLeaveHook() {}
-  addListener() {}
+  addLeaveHook(): () => void {
+    return () => {
+      // noop
+    };
+  }
+  addListener(): () => void {
+    return () => {
+      // noop
+    };
+  }
 }
 
