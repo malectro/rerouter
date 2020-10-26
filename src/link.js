@@ -22,6 +22,7 @@ export default function Link({
   onlyActiveOnIndex?: boolean,
   onClick?: (SyntheticMouseEvent<HTMLElement>) => mixed,
   children?: React.Node,
+  target?: ?string,
   ...
 }): React.Node {
   const history = useHistory();
@@ -38,7 +39,7 @@ export default function Link({
       props.onClick(event);
     }
 
-    if (event.isDefaultPrevented() || !nextLocation) {
+    if (event.isDefaultPrevented() || !nextLocation || props.target) {
       return;
     }
 
