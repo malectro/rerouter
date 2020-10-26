@@ -15,6 +15,7 @@ export type RerouterLocation = {
   searchParams: URLSearchParams,
   query: Query,
   hash: string,
+  state: mixed,
 };
 export type LocationType = $Shape<RerouterLocation> | string;
 export type LocationArg = LocationType | (RerouterLocation => LocationType);

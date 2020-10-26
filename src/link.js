@@ -5,6 +5,7 @@ import type {RerouterLocation, LocationType} from './types';
 import * as React from 'react';
 
 import {useHistory} from './hooks';
+import {resolveLocation, stringifyLocation} from './utils';
 
 
 export default function Link({
@@ -26,24 +27,23 @@ export default function Link({
   const history = useHistory();
   const {location} = history;
 
-  let href = typeof to === 'function' ? to(location) : to;
-  href = typeof href === 'string' ? href : href && href.pathname;
+  const nextLocation = to && resolveLocation(location, to);
 
-  const isActive = onlyActiveOnIndex ?
-    href === location.pathname
-    : href && location.pathname.startsWith(href);
+  const isActive = (nextLocation && (onlyActiveOnIndex ?
+    nextLocation.pathname === location.pathname
+    : location.pathname.startsWith(nextLocation.pathname)));
 
   const handleClick = (event: SyntheticMouseEvent<HTMLElement>) => {
     if (props.onClick) {
       props.onClick(event);
     }
 
-    if (event.isDefaultPrevented() || !href) {
+    if (event.isDefaultPrevented() || !nextLocation) {
       return;
     }
 
     event.preventDefault();
-    history.push(href);
+    history.push(nextLocation);
   };
 
   if (!to) {
@@ -59,7 +59,7 @@ export default function Link({
       {...props}
       className={isActive && activeClassName ? activeClassName : className}
       onClick={handleClick}
-      href={href}
+      href={nextLocation && stringifyLocation(nextLocation)}
     >
       {children}
     </a>

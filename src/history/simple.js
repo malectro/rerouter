@@ -3,27 +3,29 @@
 import type {LocationType, LocationArg, RerouterLocation} from '../types';
 import type {BaseHistory} from './base';
 
-import {createLocation} from '../utils';
+import {createLocation, resolveLocation} from '../utils';
 
 
 export default class SimpleHistory implements BaseHistory {
-  _stack: {location: LocationType, state: mixed}[];
+  _stack: {location: LocationType, state: {...}}[];
   _currentStackIndex: number;
 
   constructor(location: LocationType) {
-    this._stack = [{location, state: null}];
+    this._stack = [{location, state: {}}];
     this._currentStackIndex = 0;
   }
 
-  async push(location: LocationArg, state: mixed): Promise<void> {
+  async push(locationArg: LocationArg): Promise<void> {
+    const location = this.resolveLocation(locationArg);
     this._currentStackIndex++;
-    this._stack = [...this._stack.slice(0, this._currentStackIndex), {location: this.resolveLocation(location), state}];
+    this._stack = [...this._stack.slice(0, this._currentStackIndex), {location, state: location.state}];
   }
 
-  async replace(location: LocationArg, state: mixed): Promise<void> {
+  async replace(locationArg: LocationArg): Promise<void> {
+    const location = this.resolveLocation(locationArg);
     this._stack[this._currentStackIndex] = {
-      location: this.resolveLocation(location),
-      state,
+      location,
+      state: location.state,
     };
   }
 
@@ -40,7 +42,8 @@ export default class SimpleHistory implements BaseHistory {
   }
 
   get location(): RerouterLocation {
-    return createLocation(this._stack[this._currentStackIndex].location);
+    const {location, state} = this._stack[this._currentStackIndex];
+    return createLocation(location, state);
   }
 
   async leave() {
@@ -61,14 +64,6 @@ export default class SimpleHistory implements BaseHistory {
   resolveLocation(
     locationArg: LocationType | (RerouterLocation => LocationType),
   ): RerouterLocation {
-    const location = createLocation(
-      typeof locationArg === 'function' ?
-        locationArg(this.location)
-        : locationArg,
-    );
-    if (!location.pathname.startsWith('/')) {
-      location.pathname = this.location.pathname + '/' + location.pathname;
-    }
-    return location;
+    return resolveLocation(this.location, locationArg);
   }
 }

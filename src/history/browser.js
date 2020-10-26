@@ -10,7 +10,7 @@ import type {
 import type {BaseHistory} from './base';
 
 import {AbortError} from '../errors';
-import {createLocation, stringifyLocation} from '../utils';
+import {createLocation, resolveLocation, stringifyLocation} from '../utils';
 
 
 type HistoryState<S> = {
@@ -36,6 +36,8 @@ export default class BrowserHistory implements BaseHistory {
 
   _abortingPopState: boolean = false;
 
+  _location: RerouterLocation;
+
   constructor(
     browserHistory: History = window.history,
     location: Location = window.location,
@@ -48,6 +50,8 @@ export default class BrowserHistory implements BaseHistory {
     if (!browserHistory.state) {
       this._browserHistory.replaceState(this.generateState(), '');
     }
+
+    this.updateLocation();
 
     window.rerouterHistory = this;
 
@@ -67,7 +71,7 @@ export default class BrowserHistory implements BaseHistory {
     };
   }
 
-  async push(locationArg: LocationArg, subState: mixed = null): Promise<void> {
+  async push(locationArg: LocationArg): Promise<void> {
     const location = this.resolveLocation(locationArg);
 
     try {
@@ -81,7 +85,7 @@ export default class BrowserHistory implements BaseHistory {
     }
 
     this._currentStackIndex++;
-    const state = this.generateState(subState);
+    const state = this.generateState(location.state);
 
     this._stack = [
       ...this._stack.slice(0, this._currentStackIndex),
@@ -89,16 +93,15 @@ export default class BrowserHistory implements BaseHistory {
     ];
     this._browserHistory.pushState(state, '', stringifyLocation(location));
 
+    this.updateLocation();
     this.notify();
   }
 
   async replace(
     locationArg: LocationArg,
     {
-      state = null,
       silent,
     }: {
-      state?: mixed,
       silent?: boolean,
     } = {},
   ): Promise<void> {
@@ -116,10 +119,12 @@ export default class BrowserHistory implements BaseHistory {
       }
     }
 
-    const superState = this.generateState(state);
+    const state = this.generateState(location.state);
 
-    this._stack[this._currentStackIndex] = {location, state: superState};
+    this._stack[this._currentStackIndex] = {location, state};
     this._browserHistory.replaceState(state, '', stringifyLocation(location));
+
+    this.updateLocation();
 
     if (!silent) {
       this.notify();
@@ -136,24 +141,22 @@ export default class BrowserHistory implements BaseHistory {
     this.back();
   }
 
-  // TODO (kyle): memoize this
+  updateLocation() {
+    this._location = createLocation(
+      this._browserLocation,
+      this._browserHistory.state.subState,
+    );
+  }
+
   // $FlowFixMe[unsafe-getters-setters]
   get location(): RerouterLocation {
-    return createLocation(this._browserLocation);
+    return this._location;
   }
 
   resolveLocation(
     locationArg: LocationType | (RerouterLocation => LocationType),
   ): RerouterLocation {
-    const location = createLocation(
-      typeof locationArg === 'function' ?
-        locationArg(this.location)
-        : locationArg,
-    );
-    if (!location.pathname.startsWith('/')) {
-      location.pathname = this.location.pathname + '/' + location.pathname;
-    }
-    return location;
+    return resolveLocation(this.location, locationArg);
   }
 
   handleBeforeUnload(event: Event & {returnValue?: mixed} = window.event) {
@@ -180,8 +183,8 @@ export default class BrowserHistory implements BaseHistory {
     }
 
     try {
+      this.updateLocation();
       await this.leave();
-
       this.notify();
     } catch (error) {
       if (error instanceof AbortError) {

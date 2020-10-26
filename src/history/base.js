@@ -9,10 +9,10 @@ import type {
 
 
 export interface BaseHistory {
-  push(location: LocationArg, state?: mixed): Promise<void>;
+  push(location: LocationArg): Promise<void>;
   replace(
     location: LocationArg,
-    options?: {state?: mixed, silent?: boolean},
+    options?: {silent?: boolean},
   ): Promise<void>;
   back(): void;
   goBack(): void;
