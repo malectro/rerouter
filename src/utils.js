@@ -28,6 +28,7 @@ export function createServerLocation(
     // TODO (kyle): parse this as a pathname with a search string
     return {
       ...defaultLocation,
+      href: location,
       pathname: location,
       state,
     };
@@ -38,15 +39,17 @@ export function createServerLocation(
     (location.query && new URLSearchParams(location.query)) ||
     new URLSearchParams(location.search);
   const query = Object.fromEntries(searchParams.entries());
-  const search = searchParams.toString();
+  const searchString = searchParams.toString();
+  const search = searchString ? '?' + searchString : searchString;
+  const hash = location.hash || '';
 
   return {
-    href: location.href,
+    href: location.pathname + search + hash,
     pathname: location.pathname,
-    search: search ? '?' + search : search,
+    search,
     searchParams,
     query,
-    hash: location.hash,
+    hash,
     state: state || (location.state && location.state),
   };
 }
