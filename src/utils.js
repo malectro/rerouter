@@ -4,7 +4,24 @@ import type {LocationType, LocationArg, RerouterLocation} from './types';
 
 
 export function createLocation(
-  location: LocationType | Location = defaultLocation,
+  locationArg: LocationType | Location = defaultLocation,
+  state?: mixed,
+): RerouterLocation {
+  return createServerLocation(
+    locationArg instanceof Location ?
+      {
+        href: locationArg.href,
+        pathname: locationArg.pathname,
+        search: locationArg.search,
+        hash: locationArg.hash,
+      }
+      : locationArg,
+    state,
+  );
+}
+
+export function createServerLocation(
+  location: LocationType = defaultLocation,
   state?: mixed,
 ): RerouterLocation {
   if (typeof location === 'string') {
@@ -16,15 +33,10 @@ export function createLocation(
     };
   }
 
-  let searchParams;
-  if (location instanceof Location) {
-    searchParams = new URLSearchParams(location.search);
-  } else {
-    searchParams =
-      location.searchParams ||
-      (location.query && new URLSearchParams(location.query)) ||
-      new URLSearchParams(location.search);
-  }
+  const searchParams =
+    location.searchParams ||
+    (location.query && new URLSearchParams(location.query)) ||
+    new URLSearchParams(location.search);
   const query = Object.fromEntries(searchParams.entries());
   const search = searchParams.toString();
 

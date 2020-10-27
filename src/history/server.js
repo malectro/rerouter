@@ -1,20 +1,22 @@
-// @flow
+// @flow strict
 
 import type {LocationType, LocationArg, RerouterLocation} from '../types';
 import type {BaseHistory} from './base';
 
+// $FlowFixMe[nonstrict-import]
+import invariant from 'invariant';
 import {AbortError} from '../errors';
-import {createLocation} from '../utils';
+import {createServerLocation} from '../utils';
 
 
 type HandleRedirect = (LocationType) => mixed;
 
 export default class ServerHistory implements BaseHistory {
-  handleRedirect: HandleRedirect;
+  handleRedirect: ?HandleRedirect;
   location: RerouterLocation;
 
-  constructor(location: LocationType, onRedirect: HandleRedirect) {
-    this.location = createLocation(location);
+  constructor(location?: LocationType, onRedirect?: HandleRedirect) {
+    this.location = createServerLocation(location);
     this.handleRedirect = onRedirect;
   }
 
@@ -23,6 +25,8 @@ export default class ServerHistory implements BaseHistory {
   }
 
   async replace(location: LocationArg) {
+    invariant(this.handleRedirect != null, 'Cannot call `replace` without a redirect handler.');
+    // $FlowFixMe[not-a-function] this is definitely defined. invariant not working.
     this.handleRedirect(this.resolveLocation(location));
     throw new AbortError('Aborting due to server redirect.');
   }
@@ -52,7 +56,7 @@ export default class ServerHistory implements BaseHistory {
   resolveLocation(
     locationArg: LocationType | (RerouterLocation => LocationType),
   ): RerouterLocation {
-    const location = createLocation(
+    const location = createServerLocation(
       typeof locationArg === 'function' ?
         locationArg(this.location)
         : locationArg,

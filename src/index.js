@@ -40,6 +40,7 @@ export type {RerouterLocation, Params, Query, GetElement, ElementContext, SyncRo
 export {default as Link} from './link';
 export {BaseHistory as RouterHistory} from './history/base';
 export {default as BrowserHistory} from './history/browser';
+export {default as ServerHistory} from './history/server';
 export {useHistory, useLocation, useParams} from './hooks';
 export {useRoutes} from './useRoutes';
 export {RouterProvider} from './provider';
