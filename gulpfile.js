@@ -7,14 +7,18 @@ const babelRc = require('./.babelrc');
 
 function buildCjs() {
   return gulp
-    .src('src/**/*.js')
+    .src('src/**/*.js', {
+      ignore: 'src/__tests__/**',
+    })
     .pipe(babel(babelRc))
     .pipe(gulp.dest('cjs'));
 }
 
 function copyFlow() {
   return gulp
-    .src('src/**/*.js')
+    .src('src/**/*.js', {
+      ignore: 'src/__tests__/**',
+    })
     .pipe(
       rename(path => {
         path.extname = path.extname + '.flow';

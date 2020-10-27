@@ -30,7 +30,7 @@ export function createServerLocation(
       ...defaultLocation,
       href: location,
       pathname: location,
-      state,
+      state: state || null,
     };
   }
 
@@ -50,7 +50,7 @@ export function createServerLocation(
     searchParams,
     query,
     hash,
-    state: state || (location.state && location.state),
+    state: state || (location.state && location.state) || null,
   };
 }
 

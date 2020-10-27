@@ -27,6 +27,8 @@ export function RouterProvider({
     history.location.href,
   ]);
 
+  console.log('provider', history.location.href);
+
   return (
     <HistoryContext.Provider value={contextValue}>
       {children}

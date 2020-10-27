@@ -74,6 +74,8 @@ export default class BrowserHistory implements BaseHistory {
   async push(locationArg: LocationArg): Promise<void> {
     const location = this.resolveLocation(locationArg);
 
+    console.log('pushing', locationArg, location, stringifyLocation(location));
+
     try {
       await this.leave(location);
     } catch (error) {
