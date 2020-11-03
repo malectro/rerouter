@@ -2,8 +2,11 @@
 
 import type {SyncPath, SyncRoutes, Params} from './types';
 
-
-export function matchSync(routes: SyncRoutes, pathname: string, parentPathname: string = ''): SyncPath {
+export function matchSync(
+  routes: SyncRoutes,
+  pathname: string,
+  parentPathname: string = '',
+): SyncPath {
   for (const route of routes) {
     if (!route) {
       continue;
@@ -12,16 +15,20 @@ export function matchSync(routes: SyncRoutes, pathname: string, parentPathname: 
     const {path, children} = route;
 
     if (children && children.length > 0) {
-      const matchInfo = path ?
-        matches(path, pathname)
+      const matchInfo = path
+        ? matches(path, pathname)
         : {
-          length: 0,
-          params: {},
-        };
+            length: 0,
+            params: {},
+          };
 
       if (matchInfo) {
         const pathPart = pathname.slice(0, matchInfo.length);
-        const trail = matchSync(children, pathname.slice(matchInfo.length), parentPathname + pathPart);
+        const trail = matchSync(
+          children,
+          pathname.slice(matchInfo.length),
+          parentPathname + pathPart,
+        );
 
         if (trail && trail.length > 0) {
           trail.unshift({
@@ -55,7 +62,10 @@ export function matchSync(routes: SyncRoutes, pathname: string, parentPathname: 
   return [];
 }
 
-export function matches(routePath: string, pathname: string): {
+export function matches(
+  routePath: string,
+  pathname: string,
+): {
   length: number,
   params: Params,
 } | void {
@@ -74,11 +84,24 @@ export function matches(routePath: string, pathname: string): {
   }
 }
 
-export function pathToRegex(path: string): {
+export function pathToRegex(
+  path: string,
+): {
   regex: RegExp,
   params: string[],
 } {
   const params = pathToParams(path);
+  const string = path
+    .replace(/(?:\(([^\)]+)\))/g, (match, optional) => `(?:${optional})?`)
+    .replace(/(?:([^\?]):([^\/)]+))|(\*)/g, (match, prefix, param, wildcard) => {
+      if (param) {
+        return prefix + '([^/]+)';
+      } else if (wildcard) {
+        return '.*';
+      }
+      return match;
+    });
+  /*
   const string = path.replace(
     /(?:\(([^\)]+)\))|(?::([^\/]+))|(\*)/g,
     (match, optional, param, wildcard) => {
@@ -92,6 +115,7 @@ export function pathToRegex(path: string): {
       return match;
     },
   );
+  */
   return {
     regex: new RegExp(`^/?${string}`),
     params,
@@ -99,7 +123,7 @@ export function pathToRegex(path: string): {
 }
 
 function pathToParams(path: string): string[] {
-  const regex = /:([^\/]+)/g;
+  const regex = /:([^\/)]+)/g;
   let match;
   const params = [];
   while ((match = regex.exec(path))) {
@@ -108,7 +132,9 @@ function pathToParams(path: string): string[] {
   return params;
 }
 
-export function resolveSyncPath(path: SyncPath): {pathname: string, params: Params} {
+export function resolveSyncPath(
+  path: SyncPath,
+): {pathname: string, params: Params} {
   return {
     pathname: ''.concat(...path.map(step => step.pathname)),
     //pathname: path[0] ? path[0].pathname : '',
