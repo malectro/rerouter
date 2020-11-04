@@ -9,8 +9,9 @@ const routes = [
       {
         path: 'func',
         children: [
-          {path: '', element: 3},
-          {path: 'hello', element: 4}
+          {path: '', exact: true, element: 3},
+          {path: 'hello', element: 4},
+          {path: ':param1', exact: true, element: 7},
         ],
       },
       {
@@ -44,6 +45,36 @@ describe('matchSync', () => {
           part: '*',
           pathname: '/404',
           route: routes[0].children[3],
+        },
+      ]
+    );
+  });
+
+  test('matches param subpath', () => {
+    expect(
+      matchSync(routes, '/func/val')
+    ).toEqual(
+      [
+        {
+          params: {},
+          parentPathname: '',
+          part: undefined,
+          pathname: '',
+          route: routes[0],
+        },
+        {
+          params: {},
+          parentPathname: '',
+          part: 'func',
+          pathname: '/func',
+          route: routes[0].children[1],
+        },
+        {
+          params: {param1: 'val'},
+          parentPathname: '/func',
+          part: ':param1',
+          pathname: '/val',
+          route: routes[0].children[1].children[2],
         },
       ]
     );
@@ -103,6 +134,13 @@ describe('pathToRegex', () => {
       params: ['id', 'id2', 'id3'],
     });
   });
+
+  test('single param', () => {
+    expect(pathToRegex(':param')).toEqual({
+      regex: /^\/?([^/]+)/,
+      params: ['param'],
+    });
+  });
 });
 
 describe('matches', () => {
@@ -110,6 +148,28 @@ describe('matches', () => {
     expect(matches('root/:id', 'root/2')).toEqual(
       {
         length: 6,
+        params: {
+          id: '2',
+        },
+      },
+    );
+  });
+
+  test('absolute slash', () => {
+    expect(matches('root/:id', '/root/2')).toEqual(
+      {
+        length: 7,
+        params: {
+          id: '2',
+        },
+      },
+    );
+  });
+
+  test('single param', () => {
+    expect(matches(':id', '2')).toEqual(
+      {
+        length: 1,
         params: {
           id: '2',
         },

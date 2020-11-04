@@ -92,10 +92,11 @@ export function pathToRegex(
 } {
   const params = pathToParams(path);
   const string = path
+    .replace(/:/g, '@')
     .replace(/(?:\(([^\)]+)\))/g, (match, optional) => `(?:${optional})?`)
-    .replace(/(?:([^\?]):([^\/)]+))|(\*)/g, (match, prefix, param, wildcard) => {
+    .replace(/(@[^\/)]+)|(\*)/g, (match, param, wildcard) => {
       if (param) {
-        return prefix + '([^/]+)';
+        return '([^/]+)';
       } else if (wildcard) {
         return '.*';
       }
