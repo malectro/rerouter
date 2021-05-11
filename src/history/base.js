@@ -10,10 +10,7 @@ import type {
 
 export interface BaseHistory {
   push(location: LocationArg): Promise<void>;
-  replace(
-    location: LocationArg,
-    options?: {silent?: boolean},
-  ): Promise<void>;
+  replace(location: LocationArg, options?: {silent?: boolean}): Promise<void>;
   back(): void;
   goBack(): void;
   // $FlowFixMe[unsafe-getters-setters]
@@ -21,4 +18,5 @@ export interface BaseHistory {
   leave(): Promise<void>;
   addListener(PopStateListener): () => void;
   addLeaveHook(LeaveHook): () => void;
+  removeLeaveHook(LeaveHook): void;
 }

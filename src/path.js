@@ -2,6 +2,7 @@
 
 import type {SyncPath, SyncRoutes, Params} from './types';
 
+
 export function matchSync(
   routes: SyncRoutes,
   pathname: string,
@@ -84,6 +85,13 @@ export function matches(
   }
 }
 
+export function extractParams(
+  routePath: string,
+  pathname: string,
+): Params | void {
+  return matches(routePath, pathname)?.params;
+}
+
 export function pathToRegex(
   path: string,
 ): {
@@ -137,8 +145,8 @@ export function resolveSyncPath(
   path: SyncPath,
 ): {pathname: string, params: Params} {
   return {
-    pathname: ''.concat(...path.map(step => step.pathname)),
+    pathname: ''.concat(...path.map((step) => step.pathname)),
     //pathname: path[0] ? path[0].pathname : '',
-    params: Object.assign({}, ...path.map(step => step.params)),
+    params: Object.assign({}, ...path.map((step) => step.params)),
   };
 }

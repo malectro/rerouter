@@ -25,7 +25,10 @@ export default class ServerHistory implements BaseHistory {
   }
 
   async replace(location: LocationArg) {
-    invariant(this.handleRedirect != null, 'Cannot call `replace` without a redirect handler.');
+    invariant(
+      this.handleRedirect != null,
+      'Cannot call `replace` without a redirect handler.',
+    );
     // $FlowFixMe[not-a-function] this is definitely defined. invariant not working.
     this.handleRedirect(this.resolveLocation(location));
     throw new AbortError('Aborting due to server redirect.');
@@ -47,6 +50,9 @@ export default class ServerHistory implements BaseHistory {
       // noop
     };
   }
+  removeLeaveHook() {
+    // noop
+  }
   addListener(): () => void {
     return () => {
       // noop
@@ -54,11 +60,11 @@ export default class ServerHistory implements BaseHistory {
   }
 
   resolveLocation(
-    locationArg: LocationType | (RerouterLocation => LocationType),
+    locationArg: LocationType | ((RerouterLocation) => LocationType),
   ): RerouterLocation {
     const location = createServerLocation(
-      typeof locationArg === 'function' ?
-        locationArg(this.location)
+      typeof locationArg === 'function'
+        ? locationArg(this.location)
         : locationArg,
     );
     if (!location.pathname.startsWith('/')) {
@@ -67,4 +73,3 @@ export default class ServerHistory implements BaseHistory {
     return location;
   }
 }
-

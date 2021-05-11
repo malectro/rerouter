@@ -18,7 +18,7 @@ export type RerouterLocation = {
   state: mixed,
 };
 export type LocationType = $Shape<RerouterLocation> | string;
-export type LocationArg = LocationType | (RerouterLocation => LocationType);
+export type LocationArg = LocationType | ((RerouterLocation) => LocationType);
 
 export type Query = {
   [string]: string,
@@ -39,7 +39,7 @@ export type ElementContext = {
   children: React.Node,
 };
 
-export type GetElement = ElementContext => React.Node;
+export type GetElement = (ElementContext) => React.Node;
 
 export type SyncRoute = {
   path?: string,
@@ -48,9 +48,7 @@ export type SyncRoute = {
   exact?: boolean,
 };
 
-export type SyncRoutes = Array<
-  SyncRoute | null | false | void
->;
+export type SyncRoutes = Array<SyncRoute | null | false | void>;
 
 export type SyncPath = {
   part: ?string,

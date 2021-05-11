@@ -5,7 +5,7 @@ import type {RerouterLocation, LocationType} from './types';
 import * as React from 'react';
 
 import {useHistory} from './hooks';
-import {resolveLocation, stringifyLocation} from './utils';
+import {resolveLocation, stringifyLocation, partsMatch} from './utils';
 
 
 export default function Link({
@@ -16,11 +16,11 @@ export default function Link({
   children,
   ...props
 }: {
-  to?: LocationType | (RerouterLocation => LocationType) | void | null,
+  to?: LocationType | ((RerouterLocation) => LocationType) | void | null,
   className?: string,
   activeClassName?: string,
   onlyActiveOnIndex?: boolean,
-  onClick?: (SyntheticMouseEvent<HTMLElement>) => mixed,
+  onClick?: ?(SyntheticMouseEvent<HTMLElement>) => mixed,
   children?: React.Node,
   target?: ?string,
   ...
@@ -30,9 +30,11 @@ export default function Link({
 
   const nextLocation = to && resolveLocation(location, to);
 
-  const isActive = (nextLocation && (onlyActiveOnIndex ?
-    nextLocation.pathname === location.pathname
-    : location.pathname.startsWith(nextLocation.pathname)));
+  const isActive =
+    nextLocation &&
+    (onlyActiveOnIndex
+      ? nextLocation.pathname === location.pathname
+      : partsMatch(nextLocation.pathname, location.pathname));
 
   const handleClick = (event: SyntheticMouseEvent<HTMLElement>) => {
     if (props.onClick) {
@@ -43,8 +45,10 @@ export default function Link({
       return;
     }
 
-    event.preventDefault();
-    history.push(nextLocation);
+    if (!(event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      history.push(nextLocation);
+    }
   };
 
   if (!to) {

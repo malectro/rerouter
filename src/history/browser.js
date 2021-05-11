@@ -55,11 +55,11 @@ export default class BrowserHistory implements BaseHistory {
 
     window.rerouterHistory = this;
 
-    window.addEventListener('popstate', _event => {
+    window.addEventListener('popstate', (_event) => {
       this.handlePopState();
     });
 
-    window.addEventListener('beforeunload', event =>
+    window.addEventListener('beforeunload', (event) =>
       this.handleBeforeUnload(event),
     );
   }
@@ -73,8 +73,6 @@ export default class BrowserHistory implements BaseHistory {
 
   async push(locationArg: LocationArg): Promise<void> {
     const location = this.resolveLocation(locationArg);
-
-    console.log('pushing', locationArg, location, stringifyLocation(location));
 
     try {
       await this.leave(location);
@@ -156,7 +154,7 @@ export default class BrowserHistory implements BaseHistory {
   }
 
   resolveLocation(
-    locationArg: LocationType | (RerouterLocation => LocationType),
+    locationArg: LocationType | ((RerouterLocation) => LocationType),
   ): RerouterLocation {
     return resolveLocation(this.location, locationArg);
   }
@@ -187,6 +185,7 @@ export default class BrowserHistory implements BaseHistory {
     try {
       this.updateLocation();
       await this.leave();
+      this._currentStackIndex = nextIndex;
       this.notify();
     } catch (error) {
       if (error instanceof AbortError) {

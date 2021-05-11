@@ -8,13 +8,13 @@ export function createLocation(
   state?: mixed,
 ): RerouterLocation {
   return createServerLocation(
-    locationArg instanceof Location ?
-      {
-        href: locationArg.href,
-        pathname: locationArg.pathname,
-        search: locationArg.search,
-        hash: locationArg.hash,
-      }
+    locationArg instanceof Location
+      ? {
+          href: locationArg.href,
+          pathname: locationArg.pathname,
+          search: locationArg.search,
+          hash: locationArg.hash,
+        }
       : locationArg,
     state,
   );
@@ -58,8 +58,9 @@ export function resolveLocation(
   currentLocation: RerouterLocation,
   locationArg: LocationArg,
 ): RerouterLocation {
-  let resolvedLocationArg = typeof locationArg === 'function' ?
-      locationArg(currentLocation)
+  let resolvedLocationArg =
+    typeof locationArg === 'function'
+      ? locationArg(currentLocation)
       : locationArg;
 
   // TODO (kyle): maybe find a more efficient way to handle this?
@@ -85,9 +86,7 @@ export function resolveLocation(
     }
   }
 
-  const location = createLocation(
-    resolvedLocationArg
-  );
+  const location = createLocation(resolvedLocationArg);
   /*
   const location = createLocation(
     typeof locationArg === 'function' ?
@@ -115,4 +114,17 @@ export function stringifyLocation(location: RerouterLocation): string {
   return (
     (location.pathname || '') + (location.search || '') + (location.hash || '')
   );
+}
+
+// path1 is always assumed to be a subset or equal to path2
+export function partsMatch(path1: string, path2: string): boolean {
+  if (path1 === path2) {
+    return true;
+  }
+
+  if (path1.endsWith('/')) {
+    return path2.startsWith(path1);
+  } else {
+    return path2.startsWith(path1 + '/');
+  }
 }

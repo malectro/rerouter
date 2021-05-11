@@ -7,7 +7,7 @@ import {createLocation, resolveLocation} from '../utils';
 
 
 export default class SimpleHistory implements BaseHistory {
-  _stack: {location: LocationType, state: {...}}[];
+  _stack: {location: LocationType, state: mixed}[];
   _currentStackIndex: number;
 
   constructor(location: LocationType) {
@@ -18,7 +18,10 @@ export default class SimpleHistory implements BaseHistory {
   async push(locationArg: LocationArg): Promise<void> {
     const location = this.resolveLocation(locationArg);
     this._currentStackIndex++;
-    this._stack = [...this._stack.slice(0, this._currentStackIndex), {location, state: location.state}];
+    this._stack = [
+      ...this._stack.slice(0, this._currentStackIndex),
+      {location, state: location.state},
+    ];
   }
 
   async replace(locationArg: LocationArg): Promise<void> {
@@ -55,6 +58,9 @@ export default class SimpleHistory implements BaseHistory {
       // noop
     };
   }
+  removeLeaveHook() {
+    // noop
+  }
   addListener(): () => void {
     return () => {
       // noop
@@ -62,7 +68,7 @@ export default class SimpleHistory implements BaseHistory {
   }
 
   resolveLocation(
-    locationArg: LocationType | (RerouterLocation => LocationType),
+    locationArg: LocationType | ((RerouterLocation) => LocationType),
   ): RerouterLocation {
     return resolveLocation(this.location, locationArg);
   }

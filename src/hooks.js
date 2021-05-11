@@ -1,6 +1,5 @@
 // @flow strict
 
-
 import type {RerouterLocation, Params} from './types';
 import type {BaseHistory} from './history/base';
 import {useContext} from 'react';
